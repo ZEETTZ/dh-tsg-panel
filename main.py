@@ -19,7 +19,7 @@ async def start(user_data: UserCredentials):
     
     # 返回值
     code = 0 if file_exists else 1
-    message = f"User ID: {user_data.userid}, Password: {user_data.password}"
+    message = f""
     if file_exists:
         message += ", DreadHungerServer.exe 存在"
     else:
