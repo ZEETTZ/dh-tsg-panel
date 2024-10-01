@@ -26,6 +26,14 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+
+DreadHunger/
+Engine/
+JsPlugin/
+TSGPlugin/
+DreadHungerServer.exe
+Manifest_DebugFiles_Win64.txt
+Manifest_NonUFSFiles_Win64.txt
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.

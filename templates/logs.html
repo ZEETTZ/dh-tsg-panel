@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{filename}} - 日志</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        h2 {
+            color: #3498db;
+            margin-top: 20px;
+        }
+
+        h3 {
+            color: #3498db;
+            margin-top: 15px;
+        }
+
+        pre {
+            background-color: #f7f7f7;
+            padding: 15px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>{{filename}} 日志</h2>
+    <h3>摘要</h3>
+    <pre>{{summary_content}}</pre>
+    <h3>详细日志</h3>
+    <pre>{{log_content}}</pre>
+</body>
+
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="static/web.js"></script>
+    <link rel="stylesheet" href="static/home.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="static/tuo.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <form id="form1" class="collapsible-form">
+        <div class="drag-handle"><i class="fa fa-arrows-alt"></i></div>
+        <div class="form-header">
+            服务器管理
+        </div>
+        <div class="form-body">
+            <div class="button-group">
+                <a href="/config" class="button-link">
+                    <input type="button" value="修改">
+                </a>
+                <a href="/up" class="button-link">
+                    <input type="button" value="上传文件">
+                </a>
+            </div>
+        </div>
+
+    </form>
+
+
+    </form>
+
+    <form id="form2" class="collapsible-form">
+        <div class="drag-handle"><i class="fa fa-arrows-alt"></i></div>
+        <div class="form-header">
+            服务器状态
+        </div>
+        <div class="form-body">
+            {% if exe_exists %}
+            <p>启动文件:正常</p>
+            {% else %}
+            <p>启动文件:缺少</p>
+            {% endif %}
+            <p id="process-status">服务器运行状态: <span id="status-text">检查中...</span></p>
+            <p id="port">当前开启端口: <span id="status-text">检查中...</span></p>
+            <p id="port">补丁前置: <span id="status-text">检查中...</span></p>
+            <p id="port">TSG控制台: <span id="status-text">检查中...</span></p>
+        </div>
+    </form>
+
+    <form id="form3" class="collapsible-form">
+        <div class="drag-handle"><i class="fa fa-arrows-alt"></i></div>
+        <div class="form-header">
+            服务器管理
+        </div>
+        <div class="form-body">
+            <div class="button-group">
+                <a href="/start_server" class="button-link">
+                    <input type="button" value="开启服务器">
+                </a>
+                <a href="/stop_server" class="button-link">
+                    <input type="button" value="关闭服务器">
+                </a>
+                <a href="/log_time" class="button-link">
+                    <input type="button" value="实时日志">
+                </a>
+            </div>
+
+            <label>
+                <input type="checkbox" name="serverOption" value="option1" id="autoRestartCheckbox">
+                自动重启
+            </label>
+        </div>
+
+    </form>
+
+
+    <form id="form4" class="collapsible-form" action="/get_log" method="get">
+        <div class="drag-handle"><i class="fa fa-arrows-alt"></i></div>
+        <div class="form-header">
+            日志
+        </div>
+        <div class="form-body">
+            <div class="button-group">
+                <input type="submit" value="获取日志">
+            </div>
+        </div>
+    </form>
+    
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>日志信息</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='log.css') }}">
+</head>
+<body>
+    <h2>日志文件列表</h2>
+    <ul id="logFilesList">
+        {% for file in log_files %}
+            <li class="logItem"><a href="/log/{{ file }}">{{ file }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h2>日志文件统计</h2>
+    <div id="cheatSummaries">
+        {% for player, details in cheat_summaries.items() %}
+            <p><strong>玩家名称:</strong> {{ player }}<br>
+                作弊次数: {{ details.count }}<br>
+                作弊类型: {{ ', '.join(details.cheats) }}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

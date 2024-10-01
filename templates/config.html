@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>配置编辑</title>
+    
+    <link rel="stylesheet" href="static/styles.css">
+    <script src="static/config.js"></script>
+    <style>
+        .button-group input[type="submit"] {
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+        function showSuccessAlert() {
+            alert("保存成功");
+        }
+    </script>
+</head>
+<body>
+    <form action="/save_config" method="post" onsubmit="showSuccessAlert()">
+        <h2>服务端地址端口</h2>
+        <label for="port1">端口1:</label>
+        <input type="text" id="port1" name="port1" value="{{ port1 }}"><br>
+        <label for="port2">端口2:</label>
+        <input type="text" id="port2" name="port2" value="{{ port2 }}"><br>
+        <label for="IP">IP地址:</label>
+        <input type="text" id="IP" name="IP" value="{{ ip }}"><br>
+        <h2>游戏配置</h2>
+        <label for="map">地图选择:</label>
+
+        <select id="map" name="map">
+            <option value="Departure_Persistent" {{ 'selected' if map == 'Departure_Persistent' }}>峰顶</option>
+            <option value="Expanse_Persistent" {{ 'selected' if map == 'Expanse_Persistent' }}>代价</option>
+            <option value="Approach_Persistent" {{ 'selected' if map == 'Approach_Persistent' }}>入口</option>
+        </select><br>
+
+        <label for="playermax">最大玩家人数:</label>
+        <input type="number" id="playermax" name="playermax" min="1" max="64" value="{% if playermax %}{{ playermax }}{% else %}8{% endif %}"><br>
+        <label for="thralls">内奸人数:</label>
+        <input type="number" id="thralls" name="thralls"  min="1" max="64" value="{% if thralls %}{{ thralls }}{% else %}2{% endif %}"><br>
+        <label for="dayminutes">每天分钟数:</label>
+        <input type="number" id="dayminutes" name="dayminutes" min="6" max="15" value="{% if dayminutes %}{{ dayminutes }}{% else %}9{% endif %}"><br>
+        <label for="daysbeforeblizzard">暴风雪天数:</label>
+        <input type="number" id="daysbeforeblizzard" name="daysbeforeblizzard"  min="2" max="6" value="{% if daysbeforeblizzard %}{{ daysbeforeblizzard }}{% else %}3{% endif %}"><br>
+        <label for="predatordamage">掠食者伤害:</label>
+        <input type="number" id="predatordamage" name="predatordamage"  min="0.1" max="3" step="0.1" value="{% if predatordamage %}{{ predatordamage }}{% else %}1{% endif %}"><br>
+        <label for="coalburnrate">煤炭消耗率:</label>
+        <input type="number" id="coalburnrate" name="coalburnrate"  min="0.1" max="3" step="0.1" value="{% if coalburnrate %}{{ coalburnrate }}{% else %}1{% endif %}"><br>
+        <label for="hungerrate">饥饿消耗率:</label>
+        <input type="number" id="hungerrate" name="hungerrate"  min="0.1" max="3" step="0.1" value="{% if hungerrate %}{{ hungerrate }}{% else %}1{% endif %}"><br>
+        <label for="coldintensity">寒冷速率:</label>
+        <input type="number" id="coldintensity" name="coldintensity"  min="0.1" max="3" step="0.1" value="{% if coldintensity %}{{ coldintensity }}{% else %}1{% endif %}"><br>
+
+        <div class="button-group">
+            <input type="submit" value="保存配置">
+        </div>
+
+    </form>
+
+
+    <form action="/save_config" method="post" onsubmit="showSuccessAlert()">
+        <h2>普通补丁管理</h2>
+        <div class="text-container">
+        {% for filename in filenames %}
+        <div>
+            <input type="checkbox" name="selected_files" value="{{ filename }}">
+            {{ filename }}
+        </div>
+        {% endfor %}
+        </div>
+
+        <div class="button-group">
+            <input type="submit" value="保存配置">
+        </div>
+    </form>
+
+    <form action="/save_config" method="post" onsubmit="showSuccessAlert()">
+        <h2>TSG补丁管理</h2>
+        <label>JS补丁:</label>
+        <div class="text-container">
+            {% for jspatches in jspatches %}
+            <div>
+                <input type="checkbox" name="selected_files" value="{{ jspatches }}">
+                {{ jspatches }}
+            </div>
+            {% endfor %}
+            </div>
+        <label>Bin补丁:</label>
+        <div class="text-container">
+            {% for binpatches in binpatches %}
+            <div>
+                <input type="checkbox" name="selected_files" value="{{ binpatches }}">
+                {{ binpatches }}
+            </div>
+            {% endfor %}
+            </div>    
+
+        <div class="button-group">
+            <input type="submit" value="保存配置">
+        </div>
+    </form>
+
+
+
+    
+</body>
+</html>

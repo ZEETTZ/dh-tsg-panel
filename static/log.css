@@ -1,0 +1,117 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+h2 {
+    color: #3498db;
+    margin-top: 3rem;
+    text-align: center;
+}
+
+#ipPort {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+}
+
+#ipPort:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+ul#logFilesList {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+li.logItem {
+    background: #fff;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+li.logItem:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+h2 {
+    color: #3498db;
+    margin-top: 20px;
+}
+
+h3 {
+    color: #3498db;
+    margin-top: 15px;
+}
+
+pre {
+    background-color: #f7f7f7;
+    padding: 15px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#cheatSummaries {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 强调文本 */
+strong {
+    font-weight: bold;
+}
+
+/* 作弊摘要列表 */
+#cheatSummaries p {
+    margin-bottom: 10px;
+}
+
+/* 分隔线 */
+#cheatSummaries br {
+    display: block;
+    margin: 5px 0;
+}
+
+/* 作弊次数 */
+#cheatSummaries .count {
+    color: #007bff;
+    font-size: 1.2em;
+}
+
+/* 作弊类型 */
+#cheatSummaries .cheats {
+    color: #dc3545;
+}
