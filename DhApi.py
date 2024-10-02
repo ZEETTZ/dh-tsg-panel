@@ -18,6 +18,7 @@ app = Flask(__name__)
 
 
 ####################################轮子#############################################
+#获取json key
 def get_config_value(key, default=None):
     try:
         with open('webconfig.json', 'r') as f:
@@ -25,9 +26,11 @@ def get_config_value(key, default=None):
         return config.get(key, default)
     except (FileNotFoundError, json.JSONDecodeError):
         return default
-
+#获取exe是否存在
 def check_exe_exists(exe_name):
     return os.path.exists(exe_name)
+
+#检查进程是否存在
 def check_process_exists(process_name):
     for proc in psutil.process_iter(['name']):
         if process_name.lower() in proc.info['name'].lower():
@@ -110,6 +113,7 @@ isport = port1
 
 
 ####################################路由#############################################
+#主页
 @app.route('/')
 def home():
     update_global_variables()
@@ -120,12 +124,13 @@ def home():
 @app.route('/up')
 def up():
     return render_template('up.html')
+#获取进程是否开启
 @app.route('/process_status')
 def process_status():
     process_name = 'DreadHungerServer'
     exists = check_process_exists(process_name)
     return jsonify({'exists': exists})
-
+#获取端口
 @app.route('/port')
 def process_status_port():
     global isport
@@ -160,6 +165,7 @@ def save_config():
         
     return redirect(url_for('home'))
 
+#保存游戏配置
 @app.route('/save_game_config', methods=['POST'])
 def save_game_config():
     config_data = request.form.to_dict()
@@ -207,7 +213,7 @@ def delete_file():
 
 
 
-
+#安装前置
 @app.route('/DownPaches', methods=['GET'])
 def Down_Paches():
     url = 'http://vps3.elfidc.com:52018/d/%E5%85%B6%E4%BB%96%E6%96%87%E4%BB%B6/Win64.zip'
@@ -221,6 +227,7 @@ def Down_Paches():
 UPLOAD_FOLDER = r'DreadHunger\Binaries\Win64\Pacthes'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+#上传补丁
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -236,7 +243,7 @@ def upload_file():
         file.save(file_path)
         return jsonify({"message": f"文件 {filename} 成功上传."}), 200
 
-
+#保存默认配置
 @app.route('/save_default_config', methods=['POST'])
 def save_default_config():
     config_data = request.form.to_dict()
@@ -246,7 +253,7 @@ def save_default_config():
 
 
 
-
+#保存TSG配置
 @app.route('/save_tsg_config', methods=['POST'])
 def save_tsg_config():
     config_data = request.form.to_dict()
@@ -263,7 +270,7 @@ should_stop_auto_restart = False
 global global_process
 global_process = None
 
-
+#开启服务器路由
 @app.route('/start_server')
 def start_server():
     run_program("DreadHungerServer.exe",mapa + 
@@ -279,7 +286,7 @@ def start_server():
                 "-log",
                 )
     return redirect(url_for('home'))
-
+#停止服务器路由
 @app.route('/stop_server')
 def stop_server():
 
@@ -290,13 +297,14 @@ def stop_server():
     结束进程("DreadHungerServer.exe")
     结束进程("DreadHungerServer-Win64-Shipping.exe")
     return redirect(url_for('home'))
+#自动停止服务器路由
 @app.route('/stop_server/auto')
 def stop_server_auto():
     结束进程("DreadHungerServer.exe")
     结束进程("DreadHungerServer-Win64-Shipping.exe")
     return redirect(url_for('home'))
 
-
+#自动开启服务器切换路由
 @app.route('/start_server/auto')
 def start_server_auto():
     global should_stop_auto_restart
@@ -306,6 +314,7 @@ def start_server_auto():
     run_program_auto("DreadHungerServer.exe")
     return redirect(url_for('home'))
 
+#普通开服
 def run_program(program_path, *args):
     try:
         subprocess.Popen([program_path] + list(args))
@@ -315,6 +324,7 @@ def run_program(program_path, *args):
     except Exception as e:
         print(f"启动程序时发生错误: {e}")
 
+#端口切换开服
 def run_program_auto(program_path):
     
     # 他妈的这里真是 狗屎中狗屎
