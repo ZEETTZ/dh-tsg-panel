@@ -24,8 +24,15 @@
         <input type="text" id="port1" name="port1" value="{{ port1 }}"><br>
         <label for="port2">端口2:</label>
         <input type="text" id="port2" name="port2" value="{{ port2 }}"><br>
-        <label for="IP">IP地址:</label>
+        <label for="IP">IP地址(非必填):</label>
         <input type="text" id="IP" name="IP" value="{{ ip }}"><br>
+        <div class="button-group">
+            <input type="submit" value="保存配置">
+        </div>
+
+    </form>
+
+    <form action="/save_game_config" method="post" onsubmit="showSuccessAlert()">
         <h2>游戏配置</h2>
         <label for="map">地图选择:</label>
 
@@ -58,46 +65,74 @@
 
     </form>
 
-
-    <form action="/save_config" method="post" onsubmit="showSuccessAlert()">
+    <form action="/save_default_config" method="post" onsubmit="showSuccessAlert()" style="width: 350px;">
         <h2>普通补丁管理</h2>
-        <div class="text-container">
-        {% for filename in filenames %}
-        <div>
-            <input type="checkbox" name="selected_files" value="{{ filename }}">
-            {{ filename }}
-        </div>
-        {% endfor %}
-        </div>
-
-        <div class="button-group">
+        <table class="file-table">
+            <thead>
+                <tr>
+                    <th>选择</th>
+                    <th>文件名</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for filename in filenames %}
+                <tr>
+                    <td><input type="checkbox" name="selected_files" value="{{ filename }}"></td>
+                    <td>{{ filename }}</td>
+                    <td><button type="button" class="delete-button uniform-button">删除</button>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    
+        <div class="button-group" style="margin-top: 30px">
+            <input type="file" id="fileInput" />
             <input type="submit" value="保存配置">
+            <button type="button" style="margin-left: 30px;" class="green-button" onclick="uploadFile()">上传</button>
+
         </div>
     </form>
 
-    <form action="/save_config" method="post" onsubmit="showSuccessAlert()">
+    <form action="/save_tsg_config" method="post" onsubmit="showSuccessAlert()" style="width: 350px;">
         <h2>TSG补丁管理</h2>
-        <label>JS补丁:</label>
-        <div class="text-container">
-            {% for jspatches in jspatches %}
-            <div>
-                <input type="checkbox" name="selected_files" value="{{ jspatches }}">
-                {{ jspatches }}
-            </div>
-            {% endfor %}
-            </div>
-        <label>Bin补丁:</label>
-        <div class="text-container">
-            {% for binpatches in binpatches %}
-            <div>
-                <input type="checkbox" name="selected_files" value="{{ binpatches }}">
-                {{ binpatches }}
-            </div>
-            {% endfor %}
-            </div>    
+        <table class="file-table">
+            <thead>
+                <tr>
+                    <th>选择</th>
+                    <th>文件名</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3"><strong>JS补丁:</strong></td>
+                </tr>
+                {% for jspatches in jspatches %}
+                <tr>
+                    <td><input type="checkbox" name="selected_files" value="{{ jspatches }}"></td>
+                    <td>{{ jspatches }}</td>
+                    <td><button type="button" class="delete-button uniform-button">删除</button></td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3"><strong>Bin补丁:</strong></td>
+                </tr>
+                {% for binpatches in binpatches %}
+                <tr>
+                    <td><input type="checkbox" name="selected_files" value="{{ binpatches }}"></td>
+                    <td>{{ binpatches }}</td>
+                    <td><button type="button" class="delete-button uniform-button">删除</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-        <div class="button-group">
+        <div class="button-group" style="margin-top: 30px">
+            <input type="file" id="fileInput" />
             <input type="submit" value="保存配置">
+            <button type="button" style="margin-left: 30px;" class="green-button" onclick="uploadFile()">上传</button>
+
         </div>
     </form>
 

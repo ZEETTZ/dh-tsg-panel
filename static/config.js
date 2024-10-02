@@ -19,3 +19,59 @@ window.onload = function() {
     validateInput('hungerrate', 3);
     validateInput('coldintensity', 3);
 };
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const filename = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+            deleteFile(filename, this); 
+        });
+    });
+
+    function deleteFile(filename, button) {
+        fetch(`/delete?filename=${encodeURIComponent(filename)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('文件删除成功');
+                const row = button.closest('tr');
+                row.parentNode.removeChild(row);
+            } else {
+                alert('删除失败: ' + data.message);
+            }
+        })
+    }
+});
+
+
+function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("请选择一个文件");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert(data.message);
+            // 页面刷新
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}

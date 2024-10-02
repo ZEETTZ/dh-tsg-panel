@@ -2,7 +2,7 @@ function updateProcessStatus() {
     fetch('/process_status')
         .then(response => response.json())
         .then(data => {
-            document.getElementById('process-status').textContent = data.exists ? '服务器运行状态:存在' : '服务器运行状态:不存在';
+            document.getElementById('process-status').textContent = data.exists ? '存在' : '不存在';
         });
 }
 
@@ -12,7 +12,7 @@ function updatePortStatus() {
         .then(response => response.json())
         .then(data => {
             if ('port' in data) { // 确认数据中存在'port'字段
-                document.getElementById('port').textContent = `当前端口: ${data.port}`;
+                document.getElementById('port').textContent = `${data.port}`;
             } else {
                 console.error("Invalid data format from server");
             }

@@ -160,3 +160,87 @@ input[type="checkbox"]:focus {
     display: inline-block;
     margin-right: 10px;
 }
+
+.file-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.file-table th, .file-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.file-table th {
+    background-color: #f2f2f2;
+}
+
+.file-table td {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.uniform-button {
+    background-color: #FF5733; 
+    color: white;             
+    padding: 10px 20px;       
+    border: none;              
+    border-radius: 5px;        
+    cursor: pointer;         
+    font-size: 16px;       
+    transition: background-color 0.3s ease; 
+}
+
+.uniform-button:hover {
+    background-color: #DD3300; 
+}
+
+.uniform-button:active {
+    background-color: #AA2200; 
+}
+
+.green-button {
+    background-color: #4CAF50; 
+    color: white;             
+    padding: 10px 20px;       
+    border: none;              
+    border-radius: 5px;        
+    cursor: pointer;         
+    font-size: 16px;       
+    transition: background-color 0.3s ease; 
+}
+.green-button:hover {
+    background-color: #3E8E41; 
+}
+.green-button:active {
+    background-color: #2F6928;
+}
+
+
+input[type="file"] {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #333;
+    background-color: white;
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+
+input[type="file"]:hover {
+    border-color: #66afe9;
+}
+
+
+input[type="file"]:focus {
+    border-color: #286090;
+    outline: none;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}

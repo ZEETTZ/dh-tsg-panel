@@ -105,3 +105,54 @@ h2 {
     float: right;    
     margin-left: 5px;
 }
+
+.green-button {
+    background-color: #4CAF50; 
+    color: white;             
+    padding: 10px 20px;       
+    border: none;              
+    border-radius: 5px;        
+    cursor: pointer;         
+    font-size: 16px;       
+    transition: background-color 0.3s ease; 
+}
+.green-button:hover {
+    background-color: #3E8E41; 
+}
+.green-button:active {
+    background-color: #2F6928;
+}
+.form-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+.form-body th, .form-body td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.form-body th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.form-body tr:hover {
+    background-color: #f5f5f5;
+}
+
+.green-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 30px;
+}
+
+.green-button:hover {
+    background-color: #45a049;
+}

@@ -2,12 +2,16 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import json
 import os
 import time
-import threading
+import hashlib
 import psutil
 import glob
 import subprocess
+import requests
+import zipfile
+from io import BytesIO
 from datetime import datetime
 from collections import defaultdict
+from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 
@@ -16,7 +20,7 @@ app = Flask(__name__)
 ####################################轮子#############################################
 def get_config_value(key, default=None):
     try:
-        with open('config.json', 'r') as f:
+        with open('webconfig.json', 'r') as f:
             config = json.load(f)
         return config.get(key, default)
     except (FileNotFoundError, json.JSONDecodeError):
@@ -42,13 +46,56 @@ def 结束进程(process_name):
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass  
 
+#下载
+def download_and_extract(url, extract_to):
 
+    response = requests.get(url)
+    response.raise_for_status()  
+
+
+    zip_file = zipfile.ZipFile(BytesIO(response.content))
+
+    zip_file.extractall(extract_to)
+    zip_file.close()
 
 ####################################变量#############################################
+
+
+def update_global_variables():
+    #刷新全部全局变量
+    global port1
+    global port2
+    global ip
+    global mapa
+    global playermax
+    global thralls
+    global dayminutes
+    global daysbeforeblizzard
+    global predatordamage
+    global coalburnrate
+    global hungerrate
+    global coldintensity
+    
+    port1 = get_config_value('port1', '')
+    port2 = get_config_value('port2', '')
+    ip = get_config_value('IP', '')
+    mapa = get_config_value('map', '')
+    playermax = get_config_value('playermax', '')
+    thralls = get_config_value('thralls', '')
+    dayminutes = get_config_value('dayminutes', '')
+    daysbeforeblizzard = get_config_value('daysbeforeblizzard', '')
+    predatordamage = get_config_value('predatordamage', '')
+    coalburnrate = get_config_value('coalburnrate', '')
+    hungerrate = get_config_value('hungerrate', '')
+    coldintensity = get_config_value('coldintensity', '')
+    
+
+
+#从Config获取全局变量
 port1 = get_config_value('port1', '')
 port2 = get_config_value('port2', '')
 ip = get_config_value('IP', '')
-map = get_config_value('map', '')
+mapa = get_config_value('map', '')
 playermax = get_config_value('playermax', '')
 thralls= get_config_value('thralls', '')
 dayminutes= get_config_value('dayminutes', '')
@@ -58,11 +105,17 @@ coalburnrate= get_config_value('coalburnrate', '')
 hungerrate= get_config_value('hungerrate', '')
 coldintensity= get_config_value('coldintensity', '')
 isport = port1
+
+
+
+
 ####################################路由#############################################
 @app.route('/')
 def home():
+    update_global_variables()
     exe_exists = check_exe_exists('DreadHungerServer.exe')
-    return render_template('home.html', exe_exists=exe_exists)
+    return render_template('home.html', exe_exists=exe_exists, 
+                           tsg = 检测TSG插件(),)
 
 @app.route('/up')
 def up():
@@ -80,12 +133,12 @@ def process_status_port():
 #配置网页
 @app.route('/config')
 def config_page():
-
-
+    
     return render_template('config.html', port1=port1,
                            port2=port2,
                            ip=ip,
                            playermax=playermax,
+                           
                            thralls=thralls,
                            dayminutes=dayminutes,
                            daysbeforeblizzard=daysbeforeblizzard,
@@ -93,16 +146,111 @@ def config_page():
                            coalburnrate=coalburnrate,
                            hungerrate=hungerrate,
                            coldintensity=coldintensity,
-                           map=map,
+                           map=mapa,
                            filenames = 读取补丁目录(),
                            jspatches = 读取TSG补丁JS(),
-                           binpatches = 读取TSG补丁Bin(),
+                           binpatches = 读取TSG补丁Bin()
                            )
-#读取配置
+#保存配置
 @app.route('/save_config', methods=['POST'])
 def save_config():
     config_data = request.form.to_dict()
-    with open('config.json', 'w') as f:
+    with open('webconfig.json', 'w') as f:
+        json.dump(config_data, f)
+        
+    return redirect(url_for('home'))
+
+@app.route('/save_game_config', methods=['POST'])
+def save_game_config():
+    config_data = request.form.to_dict()
+    with open('Gameconfig.json', 'w') as f:
+        json.dump(config_data, f)
+    return redirect(url_for('home'))
+
+#文件
+
+#删除文件
+@app.route('/delete', methods=['GET'])
+def delete_file():
+    filename = request.args.get('filename')
+    
+    if not filename:
+        return jsonify({'success': False, 'message': '缺少文件名参数'})
+
+    directories = [
+        r'DreadHunger\Binaries\Win64\Pacthes',
+        r'JsPlugin',
+        r'TSGPlugin'
+    ]
+    
+    success = True
+    messages = []
+
+    for directory in directories:
+
+        file_path = os.path.join(directory, filename)
+        
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                messages.append(f'在{directory}下的文件{filename}已成功删除')
+            else:
+                messages.append(f'在{directory}下找不到文件{filename}')
+        except Exception as e:
+            success = False
+            messages.append(f'在{directory}删除文件{filename}时出错: {str(e)}')
+
+    return jsonify({
+        'success': success,
+        'message': '\n'.join(messages) 
+    })
+
+
+
+
+@app.route('/DownPaches', methods=['GET'])
+def Down_Paches():
+    url = 'http://vps3.elfidc.com:52018/d/%E5%85%B6%E4%BB%96%E6%96%87%E4%BB%B6/Win64.zip'
+    extract_to = r'DreadHunger\Binaries\Win64'
+    download_and_extract(url, extract_to)
+    return redirect(url_for('home'))
+
+
+
+
+UPLOAD_FOLDER = r'DreadHunger\Binaries\Win64\Pacthes'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "上传失败"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "上传失败"}), 400
+    if file:
+
+        filename = secure_filename(file.filename)
+
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        return jsonify({"message": f"文件 {filename} 成功上传."}), 200
+
+
+@app.route('/save_default_config', methods=['POST'])
+def save_default_config():
+    config_data = request.form.to_dict()
+    with open('Defaultconfig.json', 'w') as f:
+        json.dump(config_data, f)
+    return redirect(url_for('home'))
+
+
+
+
+@app.route('/save_tsg_config', methods=['POST'])
+def save_tsg_config():
+    config_data = request.form.to_dict()
+    with open('Tsgconfig.json', 'w') as f:
         json.dump(config_data, f)
     return redirect(url_for('home'))
 ####################################路由#############################################
@@ -118,7 +266,7 @@ global_process = None
 
 @app.route('/start_server')
 def start_server():
-    run_program("DreadHungerServer.exe",map + 
+    run_program("DreadHungerServer.exe",mapa + 
                 "?playermax=" + playermax + 
                 "?thralls=" + thralls +
                 "?dayminutes=" + dayminutes +
@@ -181,7 +329,7 @@ def run_program_auto(program_path):
     try:
         
         args = [
-            map + 
+            mapa + 
             "?playermax=" + playermax + 
             "?thralls=" + thralls +
             "?dayminutes=" + dayminutes +
@@ -208,7 +356,7 @@ def run_program_auto(program_path):
                     isport = port1
                     
                 args = [
-                    map + 
+                    mapa + 
                     "?playermax=" + playermax + 
                     "?thralls=" + thralls +
                     "?dayminutes=" + dayminutes +
@@ -261,6 +409,24 @@ def 读取TSG补丁Bin():
     js_files = glob.glob(os.path.join(directory, '*.bin'))
     filenames = [os.path.basename(file) for file in js_files]
     return filenames
+
+
+
+def MD5计算(file_path):
+    hash_md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+def 检测TSG插件():
+    expected_md5 = "2b91b31cf72f7b0a484ca6e810b5a608"
+    md5 = MD5计算(r"DreadHungerServer.exe")
+    return md5 == expected_md5
+
+
+
+
+
 ######################################补丁################################################
 
 

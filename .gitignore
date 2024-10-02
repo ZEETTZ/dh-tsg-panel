@@ -32,6 +32,10 @@ Engine/
 JsPlugin/
 TSGPlugin/
 DreadHungerServer.exe
+DreadHungerServer2.exe
+DreadHungerServer1.exe
+航海狼人杀开服工具.exe
+dh-server-tool.json
 Manifest_DebugFiles_Win64.txt
 Manifest_NonUFSFiles_Win64.txt
 # PyInstaller
