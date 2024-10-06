@@ -16,21 +16,32 @@
             alert("保存成功");
         }
     </script>
+    
 </head>
 <body>
-    <form action="/save_config" method="post" onsubmit="showSuccessAlert()">
-        <h2>服务端地址端口</h2>
-        <label for="port1">端口1:</label>
-        <input type="text" id="port1" name="port1" value="{{ port1 }}"><br>
-        <label for="port2">端口2:</label>
-        <input type="text" id="port2" name="port2" value="{{ port2 }}"><br>
+    <form action="/save_config" method="post" onsubmit="showSuccessAlert()" style="width: 320px;">
+        <h2>服务器管理</h2>
+        <label for="port1">游戏端口1:</label>
+        <input type="text" title="切换端口1" id="port1" name="port1" value="{{ port1 }}"><br>
+        <label for="port2">游戏端口2:</label>
+        <input type="text" title="切换端口2" id="port2" name="port2" value="{{ port2 }}"><br>
         <label for="IP">IP地址(非必填):</label>
         <input type="text" id="IP" name="IP" value="{{ ip }}"><br>
+        <label for="password">卡密:</label>
+        <input type="text"  title="没有卡密可以去TSG官方群免费申请"  id="password" name="password" value="{{ password }}"><br>
+        <label for="port">控制台端口:</label>
+        <input type="text" title="打开控制台：
+内网输入127.0.0.1:你的端口
+外网输入你服务器公网:你的端口" id="port" name="port" value="{{ port }}"><br>
+        <label for="pin">pin码:</label>
+        <input type="text" title="如果没设置默认为123456" id="pin" name="pin" value="{{ pin }}"><br>
+
         <div class="button-group">
             <input type="submit" value="保存配置">
         </div>
 
     </form>
+
 
     <form action="/save_game_config" method="post" onsubmit="showSuccessAlert()">
         <h2>游戏配置</h2>
@@ -65,37 +76,9 @@
 
     </form>
 
-    <form action="/save_default_config" method="post" onsubmit="showSuccessAlert()" style="width: 350px;">
-        <h2>普通补丁管理</h2>
-        <table class="file-table">
-            <thead>
-                <tr>
-                    <th>选择</th>
-                    <th>文件名</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for filename in filenames %}
-                <tr>
-                    <td><input type="checkbox" name="selected_files" value="{{ filename }}"></td>
-                    <td>{{ filename }}</td>
-                    <td><button type="button" class="delete-button uniform-button">删除</button>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    
-        <div class="button-group" style="margin-top: 30px">
-            <input type="file" id="fileInput" />
-            <input type="submit" value="保存配置">
-            <button type="button" style="margin-left: 30px;" class="green-button" onclick="uploadFile()">上传</button>
-
-        </div>
-    </form>
 
     <form action="/save_tsg_config" method="post" onsubmit="showSuccessAlert()" style="width: 350px;">
-        <h2>TSG补丁管理</h2>
+        <h2>补丁管理</h2>
         <table class="file-table">
             <thead>
                 <tr>

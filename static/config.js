@@ -12,8 +12,8 @@ function validateInput(inputId, maxValue) {
 window.onload = function() {
     validateInput('playermax', 64);
     validateInput('thralls', 64);
-    validateInput('dayminutes', 3);
-    validateInput('daysbeforeblizzard', 3);
+    validateInput('dayminutes', 15);
+    validateInput('daysbeforeblizzard', 6);
     validateInput('predatordamage', 3);
     validateInput('coalburnrate', 3);
     validateInput('hungerrate', 3);

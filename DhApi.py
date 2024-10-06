@@ -7,7 +7,9 @@ import psutil
 import glob
 import subprocess
 import requests
-import zipfile
+import sys
+import logging
+import webbrowser
 from io import BytesIO
 from datetime import datetime
 from collections import defaultdict
@@ -15,7 +17,10 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 
-
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.CRITICAL)
+cli = sys.modules['flask.cli']
+cli.show_server_banner = lambda *x: None
 
 ####################################轮子#############################################
 #获取json key
@@ -50,16 +55,24 @@ def 结束进程(process_name):
             pass  
 
 #下载
-def download_and_extract(url, extract_to):
+def download_file(url, save_path):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 114514'
+    }
+    
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()  # 检查请求是否成功
+    
+    with open(save_path, 'wb') as file:
+        file.write(response.content)
+# get api
+def get_download_info(api_url):
 
-    response = requests.get(url)
+    response = requests.get(api_url)
     response.raise_for_status()  
-
-
-    zip_file = zipfile.ZipFile(BytesIO(response.content))
-
-    zip_file.extractall(extract_to)
-    zip_file.close()
+    
+    data = response.json()
+    return data
 
 ####################################变量#############################################
 
@@ -78,6 +91,10 @@ def update_global_variables():
     global coalburnrate
     global hungerrate
     global coldintensity
+    global current_dir
+    global port
+    global password
+    global pin
     
     port1 = get_config_value('port1', '')
     port2 = get_config_value('port2', '')
@@ -91,6 +108,9 @@ def update_global_variables():
     coalburnrate = get_config_value('coalburnrate', '')
     hungerrate = get_config_value('hungerrate', '')
     coldintensity = get_config_value('coldintensity', '')
+    port = get_config_value('port', '')
+    password = get_config_value('password', '')
+    pin = get_config_value('pin', '')
     
 
 
@@ -107,9 +127,12 @@ predatordamage= get_config_value('predatordamage', '')
 coalburnrate= get_config_value('coalburnrate', '')
 hungerrate= get_config_value('hungerrate', '')
 coldintensity= get_config_value('coldintensity', '')
+port = get_config_value('port', '')
+password = get_config_value('password', '')
+pin = get_config_value('pin', '')
 isport = port1
 
-
+current_dir = os.getcwd()
 
 
 ####################################路由#############################################
@@ -121,9 +144,6 @@ def home():
     return render_template('home.html', exe_exists=exe_exists, 
                            tsg = 检测TSG插件(),)
 
-@app.route('/up')
-def up():
-    return render_template('up.html')
 #获取进程是否开启
 @app.route('/process_status')
 def process_status():
@@ -143,6 +163,9 @@ def config_page():
                            port2=port2,
                            ip=ip,
                            playermax=playermax,
+                           port=port,
+                           password=password,
+                           pin=pin,
                            
                            thralls=thralls,
                            dayminutes=dayminutes,
@@ -152,18 +175,41 @@ def config_page():
                            hungerrate=hungerrate,
                            coldintensity=coldintensity,
                            map=mapa,
-                           filenames = 读取补丁目录(),
                            jspatches = 读取TSG补丁JS(),
                            binpatches = 读取TSG补丁Bin()
                            )
-#保存配置
+
+
 @app.route('/save_config', methods=['POST'])
 def save_config():
     config_data = request.form.to_dict()
-    with open('webconfig.json', 'w') as f:
-        json.dump(config_data, f)
+    
+    if 'password' in config_data:
+        card_data = config_data['password']
         
+        card_json_data = {"password": card_data}
+        with open('card.json', 'w', encoding='utf-8') as f:
+            json.dump(card_json_data, f, ensure_ascii=False, indent=4)
+        
+        with open('webconfig.json', 'w', encoding='utf-8') as f:
+            json.dump(config_data, f, ensure_ascii=False, indent=4)
+
+    if 'port' in config_data and 'pin' in config_data:
+        port = config_data['port']
+        pin = config_data['pin']
+        
+        config_json_data = {"port": port,
+                            "pin": pin,
+                            "method":"web",
+                            "version":"1.0.4",
+                            "server_path":f'{current_dir}',
+                            "enable_frp": False}
+        with open('config.json', 'w', encoding='utf-8') as f:
+            json.dump(config_json_data, f, ensure_ascii=False, indent=4)
+    
     return redirect(url_for('home'))
+
+
 
 #保存游戏配置
 @app.route('/save_game_config', methods=['POST'])
@@ -216,32 +262,51 @@ def delete_file():
 #安装前置
 @app.route('/DownPaches', methods=['GET'])
 def Down_Paches():
-    url = 'http://vps3.elfidc.com:52018/d/%E5%85%B6%E4%BB%96%E6%96%87%E4%BB%B6/Win64.zip'
-    extract_to = r'DreadHunger\Binaries\Win64'
-    download_and_extract(url, extract_to)
+    url = 'https://tsg-console-api.moeyy.cn/version'
+    
+    download_info = get_download_info(url)
+    download_url = download_info['download_url']
+    
+    
+    extract_to = r'DreadHungerServer.exe'
+    download_file(download_url, extract_to)
     return redirect(url_for('home'))
 
 
 
 
-UPLOAD_FOLDER = r'DreadHunger\Binaries\Win64\Pacthes'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-#上传补丁
+UPLOAD_FOLDER = r'JsPlugin'
+TSGPLUGIN_FOLDER = r'TSGPlugin'
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['TSGPLUGIN_FOLDER'] = TSGPLUGIN_FOLDER
+
+# 上传补丁
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "上传失败"}), 400
+    
     file = request.files['file']
+    
     if file.filename == '':
         return jsonify({"error": "上传失败"}), 400
+    
     if file:
-
-        filename = secure_filename(file.filename)
-
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # 直接使用原始文件名
+        filename = file.filename
+        
+        # 确定保存的文件夹
+        folder = app.config['TSGPLUGIN_FOLDER'] if filename.endswith('.bin') else app.config['UPLOAD_FOLDER']
+        
+        # 构建完整的文件路径
+        file_path = os.path.join(folder, filename)
+        
+        # 保存文件
         file.save(file_path)
-        return jsonify({"message": f"文件 {filename} 成功上传."}), 200
+        
+        return jsonify({"message": f"文件 {filename} 成功上传.", "location": folder}), 200
 
 #保存默认配置
 @app.route('/save_default_config', methods=['POST'])
@@ -402,36 +467,46 @@ def end_process(process_name):
 
 ######################################补丁################################################
 
-def 读取补丁目录():
-    directory = r'DreadHunger\Binaries\Win64\Pacthes'
-    js_files = glob.glob(os.path.join(directory, '*.js'))
-    filenames = [os.path.basename(file) for file in js_files]
-    return filenames
 
 def 读取TSG补丁JS():
-    directory = r'JsPlugin'
-    js_files = glob.glob(os.path.join(directory, '*.js'))
-    filenames = [os.path.basename(file) for file in js_files]
-    return filenames
+    try:
+        directory = r'JsPlugin'
+        js_files = glob.glob(os.path.join(directory, '*.js'))
+        filenames = [os.path.basename(file) for file in js_files]
+        return filenames
+    except Exception as e:
+        print(f"读取TSG补丁JS时发生错误: {e}")
+        return []
 
 def 读取TSG补丁Bin():
-    directory = r'TSGPlugin'
-    js_files = glob.glob(os.path.join(directory, '*.bin'))
-    filenames = [os.path.basename(file) for file in js_files]
-    return filenames
-
-
+    try:
+        directory = r'TSGPlugin'
+        js_files = glob.glob(os.path.join(directory, '*.bin'))
+        filenames = [os.path.basename(file) for file in js_files]
+        return filenames
+    except Exception as e:
+        print(f"读取TSG补丁Bin时发生错误: {e}")
+        return []
 
 def MD5计算(file_path):
-    hash_md5 = hashlib.md5()
-    with open(file_path, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+    try:
+        hash_md5 = hashlib.md5()
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+    except Exception as e:
+        print(f"MD5计算时发生错误: {e}")
+        return None
+
 def 检测TSG插件():
-    expected_md5 = "2b91b31cf72f7b0a484ca6e810b5a608"
-    md5 = MD5计算(r"DreadHungerServer.exe")
-    return md5 == expected_md5
+    try:
+        expected_md5 = "2b91b31cf72f7b0a484ca6e810b5a608"
+        md5 = MD5计算(r"DreadHungerServer.exe")
+        return md5 == expected_md5
+    except Exception as e:
+        print(f"检测TSG插件时发生错误: {e}")
+        return False
 
 
 
@@ -561,7 +636,45 @@ def view_log_file(filename):
     except Exception as e:
         return f"错误: {str(e)}", 500  
 
+
+def get_public_ip():
+    try:
+        response = requests.get('https://checkip.amazonaws.com')
+        if response.status_code == 200:
+            return response.text.strip()
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+def print_color(text, color_code):
+    # ANSI 转义序列模板
+    ansi_template = f"\033[{color_code}m{{}}\033[0m"
+    print(ansi_template.format(text))
+    
 ######################################日志################################################
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    public_ip = get_public_ip()
+    CYAN = '\033[36m'  # ANSI escape code for cyan color
+    YELLOW = '\033[33m'  # ANSI escape code for yellow color
+    BLUE = '\033[34m'  # ANSI escape code for blue color
+    RESET = '\033[0m'  # ANSI escape code to reset color
+
+    def print_color(text, color_code):
+        print(f"{color_code}{text}{RESET}")
+
+    print_color("TSG海杀网页管理面板连接地址:", CYAN)
+    print_color("请使用浏览器复制以下地址", CYAN)
+    print_color("根据您需的网络环境使用", CYAN)
+
+    print_color("\n内网:\nhttp://127.0.0.1:80", YELLOW)
+    print_color(f"\n外网:\nhttp://{public_ip}:80", YELLOW)
+    
+    print_color("\n进入网页后", BLUE)
+    print_color(f"点击容器标题可展开，右上角可移动", BLUE)
+    
+    url = "http://127.0.0.1:80"
+    webbrowser.open_new_tab(url)
+    
+    app.run(debug=False, host='0.0.0.0', port=80)

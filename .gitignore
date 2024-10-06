@@ -170,3 +170,12 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+.pyarmor/config
+.pyarmor/pack/hook-pyarmor_runtime_000000.py
+.pyarmor/pack/resources.list
+webconfig.json
+DHapi.exe
+card.json
+config.json
+webconfig.json
+webconfig.json

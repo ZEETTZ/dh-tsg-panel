@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>主页</title>
+    <title>TSG海杀网页管理面板</title>
     <script src="static/web.js"></script>
     <link rel="stylesheet" href="static/home.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -23,9 +23,6 @@
             <div class="button-group">
                 <a href="/config" class="button-link">
                     <input type="button" value="修改">
-                </a>
-                <a href="/up" class="button-link">
-                    <input type="button" value="上传文件">
                 </a>
             </div>
         </div>
@@ -74,13 +71,16 @@
                     <td>{% if tsg %}<p>正常</p>{% else %}<p>缺少</p>{% endif %}</td>
                     <td>
                         {% if not tsg %}
-                        <a href="#" class="green-button" style="margin-left: 30px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="uploadFile()">
+                        <a href="DownPaches" class="green-button" style="margin-left: 30px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="uploadFile()">
                             <i class="fa-solid fa-download"></i> 安装
                         </a>
                     {% else %}
                         <a href="config" class="other-button" style="margin-left: 0px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="otherAction()">
                              配置
                         </a>
+                        <a href="config" class="other-button" style="margin-left: 0px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="otherAction()">
+                            打开
+                       </a>
                     {% endif %}
                     </td>
                 </tr>
@@ -101,9 +101,6 @@
                 </a>
                 <a href="/stop_server" class="button-link">
                     <input type="button" value="关闭服务器">
-                </a>
-                <a href="/log_time" class="button-link">
-                    <input type="button" value="实时日志">
                 </a>
             </div>
 
