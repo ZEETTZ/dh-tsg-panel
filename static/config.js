@@ -44,6 +44,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const filename = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+            editFile(filename, this); 
+        });
+    });
+
+
+
+
+    function editFile(filename) {
+        window.location.href = `/edit?filename=${encodeURIComponent(filename)}`;
+    }
+
+});
+
+
+
+
 
 function uploadFile() {
     const fileInput = document.getElementById('fileInput');
@@ -75,3 +95,5 @@ function uploadFile() {
         console.error('Error:', error);
     });
 }
+
+

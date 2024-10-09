@@ -77,7 +77,7 @@
     </form>
 
 
-    <form action="/save_tsg_config" method="post" onsubmit="showSuccessAlert()" style="width: 350px;">
+    <form action="/save_tsg_config" method="post" onsubmit="showSuccessAlert()" style="width: 400px;">
         <h2>补丁管理</h2>
         <table class="file-table">
             <thead>
@@ -95,7 +95,10 @@
                 <tr>
                     <td><input type="checkbox" name="selected_files" value="{{ jspatches }}"></td>
                     <td>{{ jspatches }}</td>
-                    <td><button type="button" class="delete-button uniform-button">删除</button></td>
+                    <td>
+                        <button type="button" class="delete-button uniform-button">删除</button>
+                        <button type="button" class="edit-button blue-button" style="margin-left: 10px;">编辑</button>
+                    </td>
                 </tr>
                 {% endfor %}
                 <tr>
@@ -115,7 +118,9 @@
             <input type="file" id="fileInput" />
             <input type="submit" value="保存配置">
             <button type="button" style="margin-left: 30px;" class="green-button" onclick="uploadFile()">上传</button>
-
+            <a href="https://tsg-patch.moeyy.cn/" class="blue-button" style="margin-left: 30px; text-decoration: none; color: inherit;">
+                下载
+            </a>
         </div>
     </form>
 

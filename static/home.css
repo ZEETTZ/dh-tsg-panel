@@ -45,9 +45,7 @@ form:hover {
 }
 
 label {
-    /* 添加5像素的左右间隔 */
     margin: 5px;
-    /* 统一字体大小和颜色 */
     font-size: 16px;
     color: #333;
     display: inline-flex;

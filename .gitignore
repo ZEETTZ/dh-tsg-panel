@@ -179,3 +179,5 @@ card.json
 config.json
 webconfig.json
 webconfig.json
+frpc.exe
+client.py

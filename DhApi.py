@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, Response
 import json
 import os
 import time
@@ -17,10 +17,10 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.CRITICAL)
-cli = sys.modules['flask.cli']
-cli.show_server_banner = lambda *x: None
+# log = logging.getLogger('werkzeug')
+# log.setLevel(logging.CRITICAL)
+# cli = sys.modules['flask.cli']
+# cli.show_server_banner = lambda *x: None
 
 ####################################轮子#############################################
 #获取json key
@@ -179,7 +179,7 @@ def config_page():
                            binpatches = 读取TSG补丁Bin()
                            )
 
-
+#保存TSG控制台配置
 @app.route('/save_config', methods=['POST'])
 def save_config():
     config_data = request.form.to_dict()
@@ -219,7 +219,74 @@ def save_game_config():
         json.dump(config_data, f)
     return redirect(url_for('home'))
 
-#文件
+#编辑文件
+@app.route('/edit', methods=['GET'])
+def edit_file():
+    filename = request.args.get('filename')
+    
+    if not filename:
+        return jsonify({'success': False, 'message': '缺少文件名参数'})
+    
+    directories = [
+        r'JsPlugin'
+    ]
+    
+    for directory in directories:
+        file_path = os.path.join(directory, filename)
+        
+        if os.path.exists(file_path):
+            content = read_file_with_encoding(file_path, ['utf-8', 'gbk', 'latin-1'])
+            if content is not None:
+                return render_template('edit.html', filename=filename, content=content)
+    
+    return jsonify({'success': False, 'message': f'文件 {filename} 不存在'})
+
+def read_file_with_encoding(file_path, encodings=['utf-8', 'gbk', 'latin-1']):
+    for encoding in encodings:
+        try:
+            with open(file_path, 'r', encoding=encoding) as file:
+                return file.read()
+        except UnicodeDecodeError:
+            continue
+    return None
+
+
+#保存文件
+
+
+@app.route('/save', methods=['POST'])
+def save_file():
+    filename = request.form.get('filename')
+    content = request.form.get('content')
+    
+    if not filename or not content:
+        return Response('缺少文件名或内容参数', status=400)  
+
+    directories = [
+        'JsPlugin'
+    ]
+    
+    success = True
+    messages = []
+
+    # 处理内容，移除BOM并统一换行符
+    content = content.lstrip('\ufeff').replace('\r\n', '\n').replace('\r', '\n')
+    
+    for directory in directories:
+        file_path = os.path.join(directory, filename)
+        
+        try:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(content)
+            messages.append(f'在{directory}下的文件{filename}已成功保存')
+        except Exception as e:
+            success = False
+            messages.append(f'在{directory}保存文件{filename}时出错: {str(e)}')
+
+    if success:
+        return redirect('/config') 
+    else:
+        return Response('\n'.join(messages), status=500)  # 保存失败时返回错误信息
 
 #删除文件
 @app.route('/delete', methods=['GET'])
@@ -462,7 +529,20 @@ def end_process(process_name):
         if process_name.lower() in proc.info['name'].lower():
             p = psutil.Process(proc.info['pid'])
             p.terminate()
+####################################文件编辑功能##########################################
+# @app.route('/save_patch', methods=['POST'])
+# def save_patch():
+#     data = request.get_json()
+#     patch_name = data.get('patchName')
+#     patch_content = data.get('patchContent')
 
+#     # 这里应该有逻辑去更新数据库中的补丁信息
+#     # 示例：update_patch_in_db(patch_name, patch_content)
+
+#     # 假设更新成功
+#     return jsonify({'success': True, 'message': '保存成功'})
+
+####################################文件编辑功能##########################################
 ####################################服务器相关##########################################
 
 ######################################补丁################################################
@@ -656,10 +736,10 @@ def print_color(text, color_code):
 
 if __name__ == '__main__':
     public_ip = get_public_ip()
-    CYAN = '\033[36m'  # ANSI escape code for cyan color
-    YELLOW = '\033[33m'  # ANSI escape code for yellow color
-    BLUE = '\033[34m'  # ANSI escape code for blue color
-    RESET = '\033[0m'  # ANSI escape code to reset color
+    CYAN = '\033[36m'  
+    YELLOW = '\033[33m'  
+    BLUE = '\033[34m'  
+    RESET = '\033[0m'  
 
     def print_color(text, color_code):
         print(f"{color_code}{text}{RESET}")
@@ -675,6 +755,6 @@ if __name__ == '__main__':
     print_color(f"点击容器标题可展开，右上角可移动", BLUE)
     
     url = "http://127.0.0.1:80"
-    webbrowser.open_new_tab(url)
+    #webbrowser.open_new_tab(url)
     
-    app.run(debug=False, host='0.0.0.0', port=80)
+    app.run(debug=True, host='0.0.0.0', port=80)
