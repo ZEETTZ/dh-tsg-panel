@@ -50,6 +50,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
+flask_session/
 .tox/
 .nox/
 .coverage
@@ -181,3 +182,6 @@ webconfig.json
 webconfig.json
 frpc.exe
 client.py
+password.txt
+*.json
+Defaultconfig.json

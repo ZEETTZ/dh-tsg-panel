@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('文件删除成功');
                 const row = button.closest('tr');
                 row.parentNode.removeChild(row);
+                location.reload();
             } else {
                 alert('删除失败: ' + data.message);
             }
@@ -57,6 +57,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function editFile(filename) {
         window.location.href = `/edit?filename=${encodeURIComponent(filename)}`;
+    }
+
+});
+
+//移动
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.move-button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const filename = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+            editFileBin(filename, this); 
+        });
+    });
+
+
+
+
+    function editFileBin(filename) {
+        window.location.href = `/move?filename=${encodeURIComponent(filename)}&next=/config`;
     }
 
 });
@@ -110,9 +128,3 @@ function uploadFile() {
         console.error('Error:', error);
     });
 }
-
-
-document.getElementById('toggleForm').addEventListener('click', function() {
-    var form = document.getElementById('myForm');
-    form.classList.toggle('hidden');
-});

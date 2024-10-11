@@ -161,6 +161,34 @@
                 Bin编辑教程
             </a>
         </div>
+
+        <h2>未使用补丁管理</h2>
+        <table class="file-table">
+            <thead>
+                <tr>
+                    <th>选择</th>
+                    <th>文件名</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3"><strong>回收站:</strong></td>
+                </tr>
+                {% for Recyclepatches in Recyclepatches %}
+                <tr>
+                    <td><input type="checkbox" name="selected_files" value="{{ Recyclepatches }}"></td>
+                    <td>{{ Recyclepatches }}</td>
+                    <td>
+                        <button type="button" class="move-button blue-button">移动</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+
     </form>
 
 

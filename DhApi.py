@@ -9,10 +9,10 @@ import psutil
 import glob
 import subprocess
 import requests
-import sys
+import shutil
 import re
-import logging
 import webbrowser
+import urllib.parse
 from io import BytesIO
 from datetime import datetime
 from collections import defaultdict
@@ -82,6 +82,18 @@ def get_download_info(api_url):
     data = response.json()
     return data
 
+def get_public_ip():
+    try:
+        response = requests.get('https://checkip.amazonaws.com')
+        if response.status_code == 200:
+            return response.text.strip()
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+public_ip = get_public_ip()
+
 ####################################变量#############################################
 
 
@@ -146,23 +158,48 @@ current_dir = os.getcwd()
 ####################################路由#############################################
 
 
-DEFAULT_PASSWORD = "123123"
+# 配置文件路径
+CONFIG_FILE = 'password.txt'
 
+
+# 保存配置文件
+def save_config_password(is_first_login, password):
+    with open(CONFIG_FILE, 'w') as f:
+        f.write(f"{is_first_login}\n")
+        f.write(f"{password}\n")
+# 读取配置文件
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r') as f:
+            lines = f.readlines()
+            # 增加检查，确保至少有两行数据
+            if len(lines) >= 2:
+                is_first_login = lines[0].strip() == 'True'
+                password = lines[1].strip()
+                return is_first_login, password
+            else:
+                print("配置文件内容不足，请检查文件格式。")
+    return True, None
+
+# 初始化配置
+global IS_FIRST_LOGIN, PASSWORD
+IS_FIRST_LOGIN, PASSWORD = load_config()
 
 MAX_ATTEMPTS = 5
 TIME_WINDOW = 600 
-
 login_attempts = {}
+
 
 # 登录路由
 @app.route('/login')
 def login():
     error = request.args.get('error')
-    return render_template('login.html', error=error)
+    return render_template('login.html', error=error, is_first_login=IS_FIRST_LOGIN)
 
 # 执行登录操作
 @app.route('/do_login', methods=['POST'])
 def do_login():
+    global IS_FIRST_LOGIN, PASSWORD
     ip = request.remote_addr
     
     if ip in login_attempts and len(login_attempts[ip]) >= MAX_ATTEMPTS:
@@ -176,7 +213,21 @@ def do_login():
     login_attempts.setdefault(ip, []).append(time.time())
     
     password = request.form['password']
-    if password == DEFAULT_PASSWORD:
+    
+    if IS_FIRST_LOGIN:
+        new_password = request.form.get('new_password')
+        if not new_password:
+            flash('首次登录，请设置新密码。')
+            return redirect(url_for('login', error='首次登录，请设置新密码。'))
+        
+        # 设置新密码
+        PASSWORD = new_password
+        IS_FIRST_LOGIN = False
+        save_config_password(IS_FIRST_LOGIN, PASSWORD)
+        flash('密码设置成功！请重新登录。')
+        return redirect(url_for('login'))
+    
+    if password == PASSWORD:
         session['logged_in'] = True
         flash('登录成功！')
         return redirect(url_for('home'))
@@ -201,7 +252,7 @@ def login_required(view_func):
 def home():
     update_global_variables()
     exe_exists = check_exe_exists('DreadHungerServer.exe')
-    return render_template('home.html', exe_exists=exe_exists, 
+    return render_template('home.html', exe_exists=exe_exists, public_ip=public_ip,
                            tsg = 检测TSG插件(),)
 #黑名单
 @app.route('/Blacklist')
@@ -267,7 +318,8 @@ def config_page():
                            map=mapa,
                            jspatches = 读取TSG补丁JS(),
                            binpatches = 读取TSG补丁Bin(),
-                           tsgconfig = 读取TSG补丁配置()
+                           tsgconfig = 读取TSG补丁配置(),
+                           Recyclepatches = 读取Recycle文件()
                            )
 
 #保存TSG控制台配置
@@ -366,6 +418,28 @@ def editbin_file():
     
     return jsonify({'success': False, 'message': f'文件 {filename} 不存在'})
 
+@app.route('/move', methods=['GET'])
+@login_required
+def move_file():
+    filename = request.args.get('filename', '')
+    filename = urllib.parse.unquote(filename)
+    if not os.path.exists(os.path.join('recycle', filename)):
+        return "文件不存在", 404
+    
+    file_extension = os.path.splitext(filename)[1].lower()
+    target_directory = 'TSGPlugin' if file_extension == '.bin' else 'JsPlugin' if file_extension == '.js' else None
+    if target_directory is None:
+        return "未知文件类型", 400
+    
+    target_path = os.path.join(target_directory, filename)
+    os.rename(os.path.join('recycle', filename), target_path)
+
+    # 获取 next 参数，如果没有则默认返回到首页
+    next_url = request.args.get('next', '/')
+    return redirect(next_url)
+
+
+
 def read_file_with_encoding(file_path, encodings=['utf-8', 'gbk', 'latin-1']):
     for encoding in encodings:
         try:
@@ -424,22 +498,25 @@ def delete_file():
         r'TSGPlugin'
     ]
     
+    recycle_dir = r'recycle'
+    os.makedirs(recycle_dir, exist_ok=True)  # 确保recycle文件夹存在
+    
     success = True
     messages = []
 
     for directory in directories:
-
         file_path = os.path.join(directory, filename)
         
         try:
             if os.path.exists(file_path):
-                os.remove(file_path)
-                messages.append(f'在{directory}下的文件{filename}已成功删除')
+                new_file_path = os.path.join(recycle_dir, filename)
+                shutil.move(file_path, new_file_path)  # 移动文件到recycle文件夹
+                messages.append(f'在{directory}下的文件{filename}已成功移动到recycle文件夹')
             else:
                 messages.append(f'在{directory}下找不到文件{filename}')
         except Exception as e:
             success = False
-            messages.append(f'在{directory}删除文件{filename}时出错: {str(e)}')
+            messages.append(f'在{directory}移动文件{filename}时出错: {str(e)}')
 
     return jsonify({
         'success': success,
@@ -689,7 +766,19 @@ def end_process(process_name):
 
 ######################################补丁################################################
 
-
+def 读取Recycle文件():
+    try:
+        directory = r'Recycle'
+        
+        js_files = glob.glob(os.path.join(directory, '*.js'))
+        bin_files = glob.glob(os.path.join(directory, '*.bin'))
+        
+        filenames = [os.path.basename(file) for file in js_files] + [os.path.basename(file) for file in bin_files]
+        
+        return filenames
+    except Exception as e:
+        print(f"读取Recycle文件时发生错误: {e}")
+        return []
 def 读取TSG补丁JS():
     try:
         directory = r'JsPlugin'
@@ -902,16 +991,7 @@ def view_log_file(filename):
         return f"错误: {str(e)}", 500
 
 
-def get_public_ip():
-    try:
-        response = requests.get('https://checkip.amazonaws.com')
-        if response.status_code == 200:
-            return response.text.strip()
-        else:
-            return None
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
+
 def print_color(text, color_code):
     # ANSI 转义序列模板
     ansi_template = f"\033[{color_code}m{{}}\033[0m"
@@ -933,13 +1013,13 @@ if __name__ == '__main__':
     print_color("请使用浏览器复制以下地址", CYAN)
     print_color("根据您需的网络环境使用", CYAN)
 
-    print_color("\n内网:\nhttp://127.0.0.1:80", YELLOW)
-    print_color(f"\n外网:\nhttp://{public_ip}:80", YELLOW)
+    print_color("\n内网:\nhttp://127.0.0.1:80/login", YELLOW)
+    print_color(f"\n外网:\nhttp://{public_ip}:80/login", YELLOW)
     
     print_color("\n进入网页后", BLUE)
     print_color(f"点击容器标题可展开，右上角可移动", BLUE)
     
-    url = "http://127.0.0.1:80"
-    #webbrowser.open_new_tab(url)
+    url = "http://127.0.0.1:80/login"
+    webbrowser.open_new_tab(url)
     
     app.run(debug=True, host='0.0.0.0', port=80)

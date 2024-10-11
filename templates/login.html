@@ -59,6 +59,9 @@
 <body>
     <h1>TSG <span>DH</span> Panel</h1>
     <form action="/do_login" method="post">
+        {% if is_first_login %}
+        <input type="password" name="new_password" placeholder="设置新密码" required>
+        {% endif %}
         <input type="password" name="password" placeholder="输入你的密码" required>
         <button type="submit">登录</button>
         {% if error %}
