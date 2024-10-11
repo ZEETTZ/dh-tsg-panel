@@ -10,7 +10,6 @@
         require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.34.0/min/vs' } });
     </script>
 
-
     <style>
         .header {
             display: flex;
@@ -41,20 +40,43 @@
             <input type="hidden" name="content" id="contentInput" value="{{ content }}">
             <input type="submit" value="保存" id="saveButton">
         </form>
-
     </div>
     <div id="editor" style="height: 100vh; width: 100%;"></div>
 
-
-
     <script>
         require(['vs/editor/editor.main'], function () {
-            window.editor = monaco.editor.create(document.getElementById('editor'), {
-                value: {{ content|tojson }},
-                language: 'javascript',
-                theme: 'vs-dark'
-            });
+            
+            const filename = "{{ filename }}";
+            let language = 'javascript'; 
+            
+            
+            if (filename.endsWith('.json')) {
+                language = 'json';
 
+                
+                try {
+                    const parsedJson = JSON.parse({{ content|tojson }});
+                    const formattedJson = JSON.stringify(parsedJson, null, 4);
+                    window.editor = monaco.editor.create(document.getElementById('editor'), {
+                        value: formattedJson,
+                        language: language, 
+                        theme: 'vs-dark'
+                    });
+                } catch (error) {
+                    console.error("Failed to parse JSON:", error);
+                    window.editor = monaco.editor.create(document.getElementById('editor'), {
+                        value: {{ content|tojson }},
+                        language: language, 
+                        theme: 'vs-dark'
+                    });
+                }
+            } else {
+                window.editor = monaco.editor.create(document.getElementById('editor'), {
+                    value: {{ content|tojson }},
+                    language: language, 
+                    theme: 'vs-dark'
+                });
+            }
 
             editor.onDidChangeModelContent(function () {
                 document.getElementById('contentInput').value = editor.getValue();

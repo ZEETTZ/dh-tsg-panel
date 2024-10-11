@@ -13,6 +13,7 @@
 </head>
 <body>
 
+
     <form id="form1" class="collapsible-form">
         <div class="drag-handle"><i class="fa fa-arrows-alt"></i></div>
         <div class="form-header">
@@ -102,6 +103,9 @@
                 <a href="/stop_server" class="button-link">
                     <input type="button" value="关闭服务器">
                 </a>
+                <a href="/log_server" class="button-link">
+                    <input type="button" value="实时日志">
+                </a>
             </div>
 
             <label>
@@ -115,18 +119,40 @@
     </form>
 
 
-    <form id="form4" class="collapsible-form" action="/get_log" method="get">
+    <form id="form4" class="collapsible-form">
         <div class="drag-handle"><i class="fa fa-arrows-alt"></i></div>
         <div class="form-header">
             <i class="fa-regular fa-newspaper"></i>
-            日志
+            日志与黑名单
+        </div>
+        <div class="button-group">
+            <a href="/get_log" class="button-link">
+                <input type="button" value="日志信息">
+            </a>
+
+            <a href="/Blacklist" class="button-link">
+                <input type="button" value="黑名单">
+            </a>
+        </div>
+    </form>
+
+
+
+    <form id="form5" class="collapsible-form" style="width: 800px;">
+        <div class="drag-handle"><i class="fa fa-arrows-alt"></i></div>
+        <div class="form-header">
+            <i class="fa-regular fa-newspaper"></i>
+            控制台
         </div>
         <div class="form-body">
-            <div class="button-group">
-                <input type="submit" value="获取日志">
+            <div class="console-scrollable">
+                <pre id="console-output" style="font-size: 12px; font-family: 'Courier New', Courier, monospace;"></pre>
             </div>
         </div>
     </form>
+
     
 </body>
+
+
 </html>

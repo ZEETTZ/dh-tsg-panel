@@ -61,7 +61,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.editbin-button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const filename = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+            editFileBin(filename, this); 
+        });
+    });
 
+
+
+
+    function editFileBin(filename) {
+        window.location.href = `/editbin?filename=${encodeURIComponent(filename)}`;
+    }
+
+});
 
 
 
@@ -97,3 +112,7 @@ function uploadFile() {
 }
 
 
+document.getElementById('toggleForm').addEventListener('click', function() {
+    var form = document.getElementById('myForm');
+    form.classList.toggle('hidden');
+});

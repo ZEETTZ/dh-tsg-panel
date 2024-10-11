@@ -10,12 +10,14 @@
         .button-group input[type="submit"] {
             margin-bottom: 10px;
         }
+        
     </style>
     <script>
         function showSuccessAlert() {
             alert("保存成功");
         }
     </script>
+    
     
 </head>
 <body>
@@ -27,8 +29,10 @@
         <input type="text" title="切换端口2" id="port2" name="port2" value="{{ port2 }}"><br>
         <label for="IP">IP地址(非必填):</label>
         <input type="text" id="IP" name="IP" value="{{ ip }}"><br>
-        <label for="password">卡密:</label>
-        <input type="text"  title="没有卡密可以去TSG官方群免费申请"  id="password" name="password" value="{{ password }}"><br>
+        <a href="http://example.com/apply" target="_blank" style="cursor: pointer;">
+            卡密:（点击申请）
+        </a>
+        <input type="text"  title="卡密可以去网页申请或者QQ群申请"  id="password" name="password" value="{{ password }}"><br>
         <label for="port">控制台端口:</label>
         <input type="text" title="打开控制台：
 内网输入127.0.0.1:你的端口
@@ -108,7 +112,9 @@
                 <tr>
                     <td><input type="checkbox" name="selected_files" value="{{ binpatches }}"></td>
                     <td>{{ binpatches }}</td>
-                    <td><button type="button" class="delete-button uniform-button">删除</button></td>
+                    <td>
+                        <button type="button" class="delete-button uniform-button">删除</button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -118,8 +124,41 @@
             <input type="file" id="fileInput" />
             <input type="submit" value="保存配置">
             <button type="button" style="margin-left: 30px;" class="green-button" onclick="uploadFile()">上传</button>
-            <a href="https://tsg-patch.moeyy.cn/" class="blue-button" style="margin-left: 30px; text-decoration: none; color: inherit;">
+            <a href="https://tsg-patch.moeyy.cn/" class="blue-button" style="margin-left: 30px; text-decoration: none; color: inherit;" target="_blank">
                 下载
+            </a>
+        </div>
+    </form>
+
+    <form  style="width: 400px;">
+        <h2>BIN管理配置修改</h2>
+        <table class="file-table">
+            <thead>
+                <tr>
+                    <th>选择</th>
+                    <th>文件名</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3"><strong>BIN配置修改:</strong></td>
+                </tr>
+                {% for tsgconfig in tsgconfig %}
+                <tr>
+                    <td><input type="checkbox" name="selected_files" value="{{ tsgconfig }}"></td>
+                    <td>{{ tsgconfig }}</td>
+                    <td>
+                        <button type="button" class="editbin-button blue-button">编辑</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="button-group" style="margin-top: 30px">
+            <a href="https://docs.qq.com/aio/DU1NaaWlPWkxNZWxR?p=K5qAwpnouYZFzz8eDK1fMX" class="blue-button" style="margin-left: 30px; text-decoration: none; color: inherit;" target="_blank">
+                Bin编辑教程
             </a>
         </div>
     </form>

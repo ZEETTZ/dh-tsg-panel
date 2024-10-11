@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blacklist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            transition: background-color 0.3s ease;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        input[type=text] {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #4372d8;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        function saveChanges() {
+            var table = document.getElementById("blacklistTable");
+            var rows = table.rows;
+    
+            // 构建新的JSON对象
+            var newData = {
+                "UniqueIds": []
+            };
+    
+            for (var i = 1; i < rows.length; i++) { // 跳过表头
+                var cells = rows[i].cells;
+                var steamIdInput = cells[0].querySelector("input");
+                var nameInput = cells[1].querySelector("input");
+                var reasonInput = cells[2].querySelector("input");
+    
+                newData.UniqueIds.push({
+                    "steam_id": steamIdInput.value,
+                    "name": nameInput.value,
+                    "reason": reasonInput.value
+                });
+            }
+    
+            // 发送AJAX请求保存数据
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/save-blacklist", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    alert("数据已保存成功！");
+                }
+            };
+            xhr.send(JSON.stringify(newData));
+        }
+    
+        function addNewRow() {
+            var table = document.getElementById("blacklistTable");
+            var newRow = table.insertRow(-1); // 在最后插入一行
+            newRow.insertCell(0).innerHTML = '<input type="text" value="">';
+            newRow.insertCell(1).innerHTML = '<input type="text" value="">'; // 玩家名字
+            newRow.insertCell(2).innerHTML = '<input type="text" value="">'; // 理由
+        }
+    </script>
+</head>
+<body>
+    <h1>黑名单列表</h1>
+    <table id="blacklistTable">
+        <thead>
+            <tr>
+                <th>UniqueIds(可以去日志中查看)</th>
+                <th>玩家名字</th>
+                <th>理由</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in blacklist['UniqueIds'] %}
+            <tr>
+                <td><input type="text" value="{{ entry.steam_id }}"></td>
+                <td><input type="text" value="{{ entry.name }}"></td>
+                <td><input type="text" value="{{ entry.reason }}"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button onclick="addNewRow()">添加新行</button>
+    <button onclick="saveChanges()">保存更改</button>
+</body>
+</html>

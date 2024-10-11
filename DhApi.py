@@ -8,12 +8,15 @@ import glob
 import subprocess
 import requests
 import sys
+import re
 import logging
 import webbrowser
 from io import BytesIO
 from datetime import datetime
 from collections import defaultdict
 from werkzeug.utils import secure_filename
+from collections import defaultdict
+
 app = Flask(__name__)
 
 
@@ -143,7 +146,30 @@ def home():
     exe_exists = check_exe_exists('DreadHungerServer.exe')
     return render_template('home.html', exe_exists=exe_exists, 
                            tsg = 检测TSG插件(),)
-
+#黑名单
+@app.route('/Blacklist')
+def Blacklist():
+    file_path = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
+    
+    if not os.path.exists(file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        with open(file_path, 'w', encoding='utf-8') as file:
+            default_data = {}  # 可以根据需要设置默认数据
+            json.dump(default_data, file, ensure_ascii=False, indent=4)
+    
+    with open(file_path, 'r', encoding='utf-8') as file:
+        blacklist_data = json.load(file)
+    return render_template('Blacklist.html', blacklist=blacklist_data)
+@app.route('/save-blacklist', methods=['POST'])
+def save_blacklist():
+    data = request.get_json()
+    file_path = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
+    
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+    
+    return jsonify({"status": "success", "message": "数据已保存成功！"})
 #获取进程是否开启
 @app.route('/process_status')
 def process_status():
@@ -176,7 +202,8 @@ def config_page():
                            coldintensity=coldintensity,
                            map=mapa,
                            jspatches = 读取TSG补丁JS(),
-                           binpatches = 读取TSG补丁Bin()
+                           binpatches = 读取TSG补丁Bin(),
+                           tsgconfig = 读取TSG补丁配置()
                            )
 
 #保存TSG控制台配置
@@ -249,7 +276,36 @@ def read_file_with_encoding(file_path, encodings=['utf-8', 'gbk', 'latin-1']):
         except UnicodeDecodeError:
             continue
     return None
+#编辑文件
+@app.route('/editbin', methods=['GET'])
+def editbin_file():
+    filename = request.args.get('filename')
+    
+    if not filename:
+        return jsonify({'success': False, 'message': '缺少文件名参数'})
+    
+    directories = [
+        r'DreadHunger\Binaries\Win64'
+    ]
+    
+    for directory in directories:
+        file_path = os.path.join(directory, filename)
+        
+        if os.path.exists(file_path):
+            content = read_file_with_encoding(file_path, ['utf-8', 'gbk', 'latin-1'])
+            if content is not None:
+                return render_template('edit.html', filename=filename, content=content)
+    
+    return jsonify({'success': False, 'message': f'文件 {filename} 不存在'})
 
+def read_file_with_encoding(file_path, encodings=['utf-8', 'gbk', 'latin-1']):
+    for encoding in encodings:
+        try:
+            with open(file_path, 'r', encoding=encoding) as file:
+                return file.read()
+        except UnicodeDecodeError:
+            continue
+    return None
 
 #保存文件
 
@@ -262,31 +318,27 @@ def save_file():
     if not filename or not content:
         return Response('缺少文件名或内容参数', status=400)  
 
-    directories = [
-        'JsPlugin'
-    ]
-    
-    success = True
-    messages = []
+    # 确定目标目录
+    target_directory = None
+    if filename.endswith('.js'):
+        target_directory = 'JsPlugin'
+    elif filename.endswith('.json'):
+        target_directory = os.path.join('DreadHunger', 'Binaries', 'Win64')
+
+    if target_directory is None:
+        return Response(f'不支持的文件类型: {filename}', status=400)
 
     # 处理内容，移除BOM并统一换行符
     content = content.lstrip('\ufeff').replace('\r\n', '\n').replace('\r', '\n')
     
-    for directory in directories:
-        file_path = os.path.join(directory, filename)
-        
-        try:
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(content)
-            messages.append(f'在{directory}下的文件{filename}已成功保存')
-        except Exception as e:
-            success = False
-            messages.append(f'在{directory}保存文件{filename}时出错: {str(e)}')
-
-    if success:
+    file_path = os.path.join(target_directory, filename)
+    
+    try:
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(content)
         return redirect('/config') 
-    else:
-        return Response('\n'.join(messages), status=500)  # 保存失败时返回错误信息
+    except Exception as e:
+        return Response(f'保存文件{filename}时出错: {str(e)}', status=500)
 
 #删除文件
 @app.route('/delete', methods=['GET'])
@@ -401,6 +453,16 @@ should_stop_auto_restart = False
 
 global global_process
 global_process = None
+
+
+#读取游戏运行日志
+LOG_FILE_PATH = 'DreadHunger\Saved\Logs\DreadHunger.log'
+
+@app.route('/get_logs')
+def get_logs():
+    with open(LOG_FILE_PATH, 'r', encoding='utf-8') as file:
+        log_content = file.read()
+    return Response(log_content, mimetype='text/plain')
 
 #开启服务器路由
 @app.route('/start_server')
@@ -567,6 +629,16 @@ def 读取TSG补丁Bin():
     except Exception as e:
         print(f"读取TSG补丁Bin时发生错误: {e}")
         return []
+    
+def 读取TSG补丁配置():
+    try:
+        directory = r'DreadHunger\Binaries\Win64'
+        js_files = glob.glob(os.path.join(directory, '*.json'))
+        filenames = [os.path.basename(file) for file in js_files]
+        return filenames
+    except Exception as e:
+        print(f"读取TSG补丁json时发生错误: {e}")
+        return []
 
 def MD5计算(file_path):
     try:
@@ -670,11 +742,13 @@ def get_log_files(directory=r'.\DreadHunger\Saved\Logs'):
     else:
         sorted_log_files = sorted(log_files_dict, key=log_files_dict.get, reverse=True)
         return sorted_log_files
-#读取目录
+
+# 读取目录
 @app.route('/log/<filename>')
 def view_log_file(filename):
     directory = r'.\DreadHunger\Saved\Logs'
     try:
+        # 尝试不同的编码方式打开文件
         for encoding in ['utf-8', 'gbk']:
             try:
                 with open(os.path.join(directory, filename), 'r', encoding=encoding) as log_file:
@@ -683,11 +757,14 @@ def view_log_file(filename):
             except UnicodeDecodeError:
                 pass  
 
+        # 过滤包含LogDHAntiCheat的行
         filtered_lines = [line for line in log_content.split('\n') if 'LogDHAntiCheat' in line]
 
+        # 如果没有找到，则再次尝试（这里可能是个冗余逻辑）
         if not filtered_lines:
             filtered_lines = [line for line in log_content.split('\n') if 'LogDHAntiCheat' in line]
 
+        # 处理作弊相关日志
         cheat_summary = defaultdict(lambda: {'count': 0, 'cheats': set()})
         for line in filtered_lines:
             parts = line.split('Warning: ')
@@ -700,21 +777,47 @@ def view_log_file(filename):
                     cheat_type_chinese = cheat_types_mapping.get(cheat_type_english, cheat_type_english) 
                     cheat_summary[player_name]['count'] += 1
                     cheat_summary[player_name]['cheats'].add(cheat_type_chinese)
+
+        # 新增对登录请求日志行的处理
+        login_requests = []
+        login_request_pattern = re.compile(r'\[(\d{4}\.\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{2}:\d{1,3})\]\[(\d+)\]LogNet: Login request: \?Name=(.*?) userId: (EOSPlus:.*?) platform: (.*)')
+
+        for line in log_content.split('\n'):
+            match = login_request_pattern.search(line)
+            if match:
+                timestamp, log_id, name, user_id, platform = match.groups()
+                # 提取实际的用户ID
+                actual_user_id = user_id.split(':')[1]
+                login_info = {
+                    'timestamp': timestamp,
+                    'log_id': log_id,
+                    'name': name,
+                    'user_id': actual_user_id,
+                    'platform': platform
+                }
+                login_requests.append(login_info)
+
+        # 构建总结内容
         summary_content = ""
-        if not cheat_summary:
-            summary_content = "未发现作弊者"
+        if not cheat_summary and not login_requests:
+            summary_content = "未发现作弊者或登录请求"
         else:
-            summary_content = ""
-            for player, info in cheat_summary.items():
-                cheats_chinese = '|'.join([cheat_types_mapping.get(cheat, cheat) for cheat in info['cheats']])
-                summary_content += f"{player}: 次数 {info['count']}次, 作弊信息:{cheats_chinese}\n"
+            if cheat_summary:
+                summary_content += "作弊总结:\n"
+                for player, info in cheat_summary.items():
+                    cheats_chinese = '|'.join([cheat_types_mapping.get(cheat, cheat) for cheat in info['cheats']])
+                    summary_content += f"{player}: 次数 {info['count']}次, 作弊信息:{cheats_chinese}\n"
+            if login_requests:
+                summary_content += "\n登录请求:\n"
+                for request in login_requests:
+                    summary_content += f"时间戳: {request['timestamp']}, 日志ID: {request['log_id']}, 用户名: {request['name']}, 用户ID: {request['user_id']}, 平台: {request['platform']}\n"
 
         return render_template('logs.html', filename=filename, summary_content=summary_content, log_content=log_content)
 
     except FileNotFoundError:
         return "日志文件未找到", 404
     except Exception as e:
-        return f"错误: {str(e)}", 500  
+        return f"错误: {str(e)}", 500
 
 
 def get_public_ip():

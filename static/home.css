@@ -154,3 +154,25 @@ h2 {
 .green-button:hover {
     background-color: #45a049;
 }
+
+.form-body {
+    position: relative;
+}
+
+.console-scrollable {
+    position: relative;
+    width: 800px; /* 初始宽度 */
+    height: 600px; /* 初始高度 */
+    border: 1px solid #ccc;
+    overflow: auto;
+}
+
+.resize-handle {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 10px;
+    height: 10px;
+    background-color: #007bff;
+    cursor: se-resize;
+}

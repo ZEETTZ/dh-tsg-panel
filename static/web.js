@@ -22,11 +22,22 @@ function updatePortStatus() {
         });
 }
 
+
+function updateConsole() {
+    fetch('/get_logs')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('console-output').textContent = data;
+        });
+}
+
 window.onload = function() {
+    updateConsole();
     updateProcessStatus();
     updatePortStatus();
     setInterval(updateProcessStatus, 3000); 
-    setInterval(updatePortStatus, 3000); 
+    setInterval(updatePortStatus, 3000);
+    setInterval(updateConsole, 1000);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -76,3 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+
+
+

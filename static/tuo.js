@@ -29,18 +29,25 @@ $(function() {
     const numForms = forms.length;
     const screenWidth = $(window).width();
     const screenHeight = $(window).height();
-    const formWidth = forms.first().outerWidth();
-    const formHeight = forms.first().outerHeight();
-    const horizontalSpacing = (screenWidth - (numForms * formWidth)) / (numForms + 1);
+    const defaultPositions = {
+        form1: {top: 22.000003814697266, left: 1299.157470703125},
+        form2: {top: 31.7906494140625, left: 59.86993408203125},
+        form3: {top: 431.9125061035156, left: 59.350006103515625},
+        form4: {top: 146, left: 1299.4781494140625},
+        form5: {top: 15.787506103515625, left: 456.95001220703125}
+    };
 
     for (let i = 0; i < numForms; i++) {
         const formId = forms.eq(i).attr('id');
-        const leftPos = horizontalSpacing + (horizontalSpacing + formWidth) * i;
-        const topPos = (screenHeight - formHeight) / 2;
+        const defaultPosition = defaultPositions[formId];
+        const leftPos = defaultPosition ? defaultPosition.left : (screenWidth - forms.first().outerWidth()) / 2;
+        const topPos = defaultPosition ? defaultPosition.top : (screenHeight - forms.first().outerHeight()) / 2;
+
         forms.eq(i).css({
             left: leftPos + 'px',
             top: topPos + 'px'
         });
+
         if (localStorage.getItem(formId + 'Position')) {
             const position = JSON.parse(localStorage.getItem(formId + 'Position'));
             forms.eq(i).css({
