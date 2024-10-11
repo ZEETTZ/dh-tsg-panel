@@ -1,10 +1,10 @@
 $(function() {
     let isDragging = false;
 
-    // 初始化显示第一个表单的内容
+
     $('.collapsible-form:first-child .form-body').show();
 
-    // 从 localStorage 中恢复表单状态
+
     $('.collapsible-form').each(function() {
         const formBody = $(this).find('.form-body');
         const formId = $(this).attr('id');
@@ -12,19 +12,20 @@ $(function() {
         formBody.toggle(isVisible);
     });
 
-    // 处理点击事件
+
     $('.collapsible-form .form-header').on('click', function() {
-        if (isDragging) return; // 如果正在拖动，则忽略点击事件
+        if (isDragging) return; 
 
         const $formBody = $(this).next('.form-body');
         $formBody.slideToggle(function() {
             const formId = $(this).closest('.collapsible-form').attr('id');
             const isVisible = $formBody.is(':visible');
             localStorage.setItem(formId + 'Visibility', isVisible);
+            
         });
     });
 
-    // 设置表单位置
+
     const forms = $('form.collapsible-form');
     const numForms = forms.length;
     const screenWidth = $(window).width();
@@ -57,10 +58,10 @@ $(function() {
         }
     }
 
-    // 使表单可拖动
+
     forms.draggable({
         containment: 'window',
-        handle: '.drag-handle', // 指定拖动句柄
+        handle: '.drag-handle', 
         start: function() {
             isDragging = true;
         },

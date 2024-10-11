@@ -11,7 +11,7 @@ function updatePortStatus() {
     fetch('/port')
         .then(response => response.json())
         .then(data => {
-            if ('port' in data) { // 确认数据中存在'port'字段
+            if ('port' in data) { 
                 document.getElementById('port').textContent = `${data.port}`;
             } else {
                 console.error("Invalid data format from server");
@@ -91,3 +91,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();
+});
+
+
+function scrollToBottom() {
+    const consoleOutput = document.getElementById('console-output');
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+}

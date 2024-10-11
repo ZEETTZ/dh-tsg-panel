@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, Response
+from flask import Flask, session, flash
+from flask_session import Session
 import json
 import os
 import time
@@ -16,9 +18,12 @@ from datetime import datetime
 from collections import defaultdict
 from werkzeug.utils import secure_filename
 from collections import defaultdict
+from functools import wraps
 
 app = Flask(__name__)
-
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 # log = logging.getLogger('werkzeug')
 # log.setLevel(logging.CRITICAL)
@@ -139,8 +144,60 @@ current_dir = os.getcwd()
 
 
 ####################################路由#############################################
+
+
+DEFAULT_PASSWORD = "123123"
+
+
+MAX_ATTEMPTS = 5
+TIME_WINDOW = 600 
+
+login_attempts = {}
+
+# 登录路由
+@app.route('/login')
+def login():
+    error = request.args.get('error')
+    return render_template('login.html', error=error)
+
+# 执行登录操作
+@app.route('/do_login', methods=['POST'])
+def do_login():
+    ip = request.remote_addr
+    
+    if ip in login_attempts and len(login_attempts[ip]) >= MAX_ATTEMPTS:
+        current_time = time.time()
+        login_attempts[ip] = [t for t in login_attempts[ip] if current_time - t < TIME_WINDOW]
+        
+        if len(login_attempts[ip]) >= MAX_ATTEMPTS:
+            flash('登录尝试过多，请稍后再试。')
+            return redirect(url_for('login', error='登录尝试过多，请稍后再试。'))
+    
+    login_attempts.setdefault(ip, []).append(time.time())
+    
+    password = request.form['password']
+    if password == DEFAULT_PASSWORD:
+        session['logged_in'] = True
+        flash('登录成功！')
+        return redirect(url_for('home'))
+    else:
+        error = '密码错误，请重试。'
+        return redirect(url_for('login', error=error))
+
+# 需要登录验证的视图装饰器
+def login_required(view_func):
+    @wraps(view_func)
+    def decorated_view(*args, **kwargs):
+        if 'logged_in' in session:
+            return view_func(*args, **kwargs)
+        else:
+            flash('您尚未登录，请先登录。')
+            return redirect(url_for('login', next=request.url))
+    return decorated_view
+
 #主页
 @app.route('/')
+@login_required
 def home():
     update_global_variables()
     exe_exists = check_exe_exists('DreadHungerServer.exe')
@@ -148,7 +205,9 @@ def home():
                            tsg = 检测TSG插件(),)
 #黑名单
 @app.route('/Blacklist')
+@login_required
 def Blacklist():
+    
     file_path = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
     
     if not os.path.exists(file_path):
@@ -162,6 +221,7 @@ def Blacklist():
         blacklist_data = json.load(file)
     return render_template('Blacklist.html', blacklist=blacklist_data)
 @app.route('/save-blacklist', methods=['POST'])
+@login_required
 def save_blacklist():
     data = request.get_json()
     file_path = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
@@ -172,17 +232,21 @@ def save_blacklist():
     return jsonify({"status": "success", "message": "数据已保存成功！"})
 #获取进程是否开启
 @app.route('/process_status')
+@login_required
 def process_status():
     process_name = 'DreadHungerServer'
     exists = check_process_exists(process_name)
     return jsonify({'exists': exists})
 #获取端口
 @app.route('/port')
+@login_required
 def process_status_port():
     global isport
     return jsonify({'port': isport})
 #配置网页
 @app.route('/config')
+
+@login_required
 def config_page():
     
     return render_template('config.html', port1=port1,
@@ -208,6 +272,7 @@ def config_page():
 
 #保存TSG控制台配置
 @app.route('/save_config', methods=['POST'])
+@login_required
 def save_config():
     config_data = request.form.to_dict()
     
@@ -240,6 +305,7 @@ def save_config():
 
 #保存游戏配置
 @app.route('/save_game_config', methods=['POST'])
+@login_required
 def save_game_config():
     config_data = request.form.to_dict()
     with open('Gameconfig.json', 'w') as f:
@@ -248,6 +314,7 @@ def save_game_config():
 
 #编辑文件
 @app.route('/edit', methods=['GET'])
+@login_required
 def edit_file():
     filename = request.args.get('filename')
     
@@ -278,6 +345,7 @@ def read_file_with_encoding(file_path, encodings=['utf-8', 'gbk', 'latin-1']):
     return None
 #编辑文件
 @app.route('/editbin', methods=['GET'])
+@login_required
 def editbin_file():
     filename = request.args.get('filename')
     
@@ -311,6 +379,7 @@ def read_file_with_encoding(file_path, encodings=['utf-8', 'gbk', 'latin-1']):
 
 
 @app.route('/save', methods=['POST'])
+@login_required
 def save_file():
     filename = request.form.get('filename')
     content = request.form.get('content')
@@ -342,6 +411,7 @@ def save_file():
 
 #删除文件
 @app.route('/delete', methods=['GET'])
+@login_required
 def delete_file():
     filename = request.args.get('filename')
     
@@ -380,6 +450,7 @@ def delete_file():
 
 #安装前置
 @app.route('/DownPaches', methods=['GET'])
+@login_required
 def Down_Paches():
     url = 'https://tsg-console-api.moeyy.cn/version'
     
@@ -403,6 +474,7 @@ app.config['TSGPLUGIN_FOLDER'] = TSGPLUGIN_FOLDER
 
 # 上传补丁
 @app.route('/upload', methods=['POST'])
+@login_required
 def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "上传失败"}), 400
@@ -429,6 +501,7 @@ def upload_file():
 
 #保存默认配置
 @app.route('/save_default_config', methods=['POST'])
+@login_required
 def save_default_config():
     config_data = request.form.to_dict()
     with open('Defaultconfig.json', 'w') as f:
@@ -439,6 +512,7 @@ def save_default_config():
 
 #保存TSG配置
 @app.route('/save_tsg_config', methods=['POST'])
+@login_required
 def save_tsg_config():
     config_data = request.form.to_dict()
     with open('Tsgconfig.json', 'w') as f:
@@ -456,9 +530,10 @@ global_process = None
 
 
 #读取游戏运行日志
-LOG_FILE_PATH = 'DreadHunger\Saved\Logs\DreadHunger.log'
+LOG_FILE_PATH = r'DreadHunger\Saved\Logs\DreadHunger.log'
 
 @app.route('/get_logs')
+@login_required
 def get_logs():
     with open(LOG_FILE_PATH, 'r', encoding='utf-8') as file:
         log_content = file.read()
@@ -466,6 +541,7 @@ def get_logs():
 
 #开启服务器路由
 @app.route('/start_server')
+@login_required
 def start_server():
     run_program("DreadHungerServer.exe",mapa + 
                 "?playermax=" + playermax + 
@@ -482,6 +558,7 @@ def start_server():
     return redirect(url_for('home'))
 #停止服务器路由
 @app.route('/stop_server')
+@login_required
 def stop_server():
 
     global should_stop_auto_restart
@@ -493,6 +570,7 @@ def stop_server():
     return redirect(url_for('home'))
 #自动停止服务器路由
 @app.route('/stop_server/auto')
+@login_required
 def stop_server_auto():
     结束进程("DreadHungerServer.exe")
     结束进程("DreadHungerServer-Win64-Shipping.exe")
@@ -500,6 +578,7 @@ def stop_server_auto():
 
 #自动开启服务器切换路由
 @app.route('/start_server/auto')
+@login_required
 def start_server_auto():
     global should_stop_auto_restart
     should_stop_auto_restart = False 
@@ -510,6 +589,7 @@ def start_server_auto():
 
 #普通开服
 def run_program(program_path, *args):
+    
     try:
         subprocess.Popen([program_path] + list(args))
         print(f"成功启动程序: {program_path} 参数: {args}")
@@ -671,6 +751,7 @@ def 检测TSG插件():
 ######################################日志#############################################
 #读取日志
 @app.route('/get_log')
+@login_required
 def display_connection_info():
     global current_port
     log_files = get_log_files()
@@ -745,6 +826,7 @@ def get_log_files(directory=r'.\DreadHunger\Saved\Logs'):
 
 # 读取目录
 @app.route('/log/<filename>')
+@login_required
 def view_log_file(filename):
     directory = r'.\DreadHunger\Saved\Logs'
     try:

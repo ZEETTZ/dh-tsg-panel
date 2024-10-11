@@ -161,8 +161,8 @@ h2 {
 
 .console-scrollable {
     position: relative;
-    width: 800px; /* 初始宽度 */
-    height: 600px; /* 初始高度 */
+    width: 800px; 
+    height: 600px;
     border: 1px solid #ccc;
     overflow: auto;
 }
