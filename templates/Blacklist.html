@@ -85,6 +85,8 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     alert("数据已保存成功！");
+                    window.location.href = "/";
+
                 }
             };
             xhr.send(JSON.stringify(newData));

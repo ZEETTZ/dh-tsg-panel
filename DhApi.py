@@ -41,6 +41,13 @@ def get_config_value(key, default=None):
         return config.get(key, default)
     except (FileNotFoundError, json.JSONDecodeError):
         return default
+def get_gameconfig_value(key, default=None):
+    try:
+        with open('Gameconfig.json', 'r') as f:
+            config = json.load(f)
+        return config.get(key, default)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default
 #获取exe是否存在
 def check_exe_exists(exe_name):
     return os.path.exists(exe_name)
@@ -121,15 +128,17 @@ def update_global_variables():
     port1 = get_config_value('port1', '')
     port2 = get_config_value('port2', '')
     ip = get_config_value('IP', '')
-    mapa = get_config_value('map', '')
-    playermax = get_config_value('playermax', '')
-    thralls = get_config_value('thralls', '')
-    dayminutes = get_config_value('dayminutes', '')
-    daysbeforeblizzard = get_config_value('daysbeforeblizzard', '')
-    predatordamage = get_config_value('predatordamage', '')
-    coalburnrate = get_config_value('coalburnrate', '')
-    hungerrate = get_config_value('hungerrate', '')
-    coldintensity = get_config_value('coldintensity', '')
+    mapa = get_gameconfig_value('map', 'Departure_Persistent')
+    playermax = get_gameconfig_value('playermax', '8')
+    thralls = get_gameconfig_value('thralls', '2')
+    dayminutes = get_gameconfig_value('dayminutes', '9')
+    daysbeforeblizzard = get_gameconfig_value('daysbeforeblizzard', '3')
+    predatordamage = get_gameconfig_value('predatordamage', '1')
+    coalburnrate = get_gameconfig_value('coalburnrate', '1')
+    hungerrate = get_gameconfig_value('hungerrate', '1')
+    coldintensity = get_gameconfig_value('coldintensity', '1')
+    
+    
     port = get_config_value('port', '')
     password = get_config_value('password', '')
     pin = get_config_value('pin', '')
@@ -140,15 +149,17 @@ def update_global_variables():
 port1 = get_config_value('port1', '')
 port2 = get_config_value('port2', '')
 ip = get_config_value('IP', '')
-mapa = get_config_value('map', '')
-playermax = get_config_value('playermax', '')
-thralls= get_config_value('thralls', '')
-dayminutes= get_config_value('dayminutes', '')
-daysbeforeblizzard= get_config_value('daysbeforeblizzard', '')
-predatordamage= get_config_value('predatordamage', '')
-coalburnrate= get_config_value('coalburnrate', '')
-hungerrate= get_config_value('hungerrate', '')
-coldintensity= get_config_value('coldintensity', '')
+
+mapa = get_config_value('map', 'Departure_Persistent')
+playermax = get_gameconfig_value('playermax', '8')
+thralls= get_gameconfig_value('thralls', '2')
+dayminutes= get_gameconfig_value('dayminutes', '9')
+daysbeforeblizzard= get_gameconfig_value('daysbeforeblizzard', '3')
+predatordamage= get_gameconfig_value('predatordamage', '1')
+coalburnrate= get_gameconfig_value('coalburnrate', '1')
+hungerrate= get_gameconfig_value('hungerrate', '1')
+coldintensity= get_gameconfig_value('coldintensity', '1')
+
 port = get_config_value('port', '')
 password = get_config_value('password', '')
 pin = get_config_value('pin', '')
@@ -261,7 +272,7 @@ def home():
 @login_required
 def Blacklist():
     
-    file_path = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
+    file_path = 'DreadHunger\\Binaries\\Win64\\Steamids.json'
     
     if not os.path.exists(file_path):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -277,9 +288,18 @@ def Blacklist():
 @login_required
 def save_blacklist():
     data = request.get_json()
-    file_path = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
     
-    with open(file_path, 'w', encoding='utf-8') as file:
+    valid_steam_ids = [item['steam_id'] for item in data['UniqueIds'] if item['steam_id']]
+    
+    new_data = {"steam_ids": valid_steam_ids}
+    file_path_new = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
+    
+    with open(file_path_new, 'w', encoding='utf-8') as file:
+        json.dump(new_data, file, ensure_ascii=False, indent=4)
+    
+    file_path_original = 'DreadHunger\\Binaries\\Win64\\Steamids.json'
+    
+    with open(file_path_original, 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
     
     return jsonify({"status": "success", "message": "数据已保存成功！"})
