@@ -185,3 +185,5 @@ client.py
 password.txt
 *.json
 Defaultconfig.json
+打包.bat
+启动版本api.bat

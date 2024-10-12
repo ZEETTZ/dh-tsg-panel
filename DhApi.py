@@ -991,20 +991,49 @@ def view_log_file(filename):
         return f"错误: {str(e)}", 500
 
 
-
+CYAN = '\033[36m'  
+YELLOW = '\033[33m'  
+BLUE = '\033[34m'  
+RESET = '\033[0m'  
 def print_color(text, color_code):
     # ANSI 转义序列模板
     ansi_template = f"\033[{color_code}m{{}}\033[0m"
     print(ansi_template.format(text))
     
+def get_version_info():
+    """从API获取版本信息"""
+    try:
+        response = requests.get('http://vps3.elfidc.com:52016/version')
+        response.raise_for_status()  # 检查请求是否成功
+        return response.json()
+    except requests.RequestException as e:
+        print_color(f"获取版本信息失败", YELLOW)
+        return None
+
+def check_version(local_version):
+    """检查本地版本是否是最新的"""
+    version_info = get_version_info()
+    if not version_info:
+        return False
+    latest_version = version_info.get('version')
+    if local_version != latest_version:
+        print_color(f"检测到新版本: {latest_version}", YELLOW)
+        download_url = version_info.get('download_url')
+        print_color(f"请从此链接下载更新: {download_url}", YELLOW)
+        input("请按任意键结束程序...")
+        return False
+    return True
+    
 ######################################日志################################################
 
 if __name__ == '__main__':
+    
+    local_version = '1.0.1'
+    
+    if not check_version(local_version):
+        exit(1)
+
     public_ip = get_public_ip()
-    CYAN = '\033[36m'  
-    YELLOW = '\033[33m'  
-    BLUE = '\033[34m'  
-    RESET = '\033[0m'  
 
     def print_color(text, color_code):
         print(f"{color_code}{text}{RESET}")
@@ -1022,4 +1051,4 @@ if __name__ == '__main__':
     url = "http://127.0.0.1:80/login"
     webbrowser.open_new_tab(url)
     
-    app.run(debug=True, host='0.0.0.0', port=80)
+    app.run(debug=False, host='0.0.0.0', port=80)
