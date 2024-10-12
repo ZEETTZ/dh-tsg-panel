@@ -13,6 +13,8 @@ import shutil
 import re
 import webbrowser
 import urllib.parse
+import logging
+import sys
 from io import BytesIO
 from datetime import datetime
 from collections import defaultdict
@@ -25,10 +27,10 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# log = logging.getLogger('werkzeug')
-# log.setLevel(logging.CRITICAL)
-# cli = sys.modules['flask.cli']
-# cli.show_server_banner = lambda *x: None
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.CRITICAL)
+cli = sys.modules['flask.cli']
+cli.show_server_banner = lambda *x: None
 
 ####################################轮子#############################################
 #获取json key
@@ -525,19 +527,20 @@ def delete_file():
 
 
 
-#安装前置
+# 安装前置
 @app.route('/DownPaches', methods=['GET'])
 @login_required
 def Down_Paches():
-    url = 'https://tsg-console-api.moeyy.cn/version'
+    url = 'https://tsg-console-api.moeyy.cn/version?mode=download'
     
     download_info = get_download_info(url)
     download_url = download_info['download_url']
     
-    
     extract_to = r'DreadHungerServer.exe'
     download_file(download_url, extract_to)
-    return redirect(url_for('home'))
+    
+    # 返回成功状态给前端
+    return jsonify({'status': 'success'}), 200
 
 
 
@@ -1028,7 +1031,7 @@ def check_version(local_version):
 
 if __name__ == '__main__':
     
-    local_version = '1.0.1'
+    local_version = '1.0.0'
     
     if not check_version(local_version):
         exit(1)
@@ -1041,14 +1044,15 @@ if __name__ == '__main__':
     print_color("TSG海杀网页管理面板连接地址:", CYAN)
     print_color("请使用浏览器复制以下地址", CYAN)
     print_color("根据您需的网络环境使用", CYAN)
+    print_color("外网使用需要开放或映射80端口", CYAN)
 
-    print_color("\n内网:\nhttp://127.0.0.1:80/login", YELLOW)
-    print_color(f"\n外网:\nhttp://{public_ip}:80/login", YELLOW)
+    print_color("\n内网:\nhttp://127.0.0.1:80", YELLOW)
+    print_color(f"\n外网:\nhttp://{public_ip}:80", YELLOW)
     
     print_color("\n进入网页后", BLUE)
     print_color(f"点击容器标题可展开，右上角可移动", BLUE)
     
-    url = "http://127.0.0.1:80/login"
+    url = "http://127.0.0.1:80"
     webbrowser.open_new_tab(url)
     
     app.run(debug=False, host='0.0.0.0', port=80)

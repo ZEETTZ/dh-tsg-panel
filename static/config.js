@@ -98,33 +98,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-function uploadFile() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
+function installFile() {
+    // 获取并隐藏安装按钮
+    var button = document.getElementById('installButton');
+    button.style.display = 'none';
 
-    if (!file) {
-        alert("请选择一个文件");
-        return;
-    }
+    alert("开始安装...");
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    fetch('/upload', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-        } else {
-            alert(data.message);
-            // 页面刷新
-            location.reload();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    // 执行安装逻辑
+    fetch('/DownPaches')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('安装成功!');
+                location.reload();
+            } else {
+                alert('安装失败，请重试。');
+                // 安装失败后重新显示按钮
+                button.style.display = 'inline-flex';
+            }
+        })
+        .catch(error => {
+            alert('请求出错，请检查网络连接。');
+            // 请求出错后重新显示按钮
+            button.style.display = 'inline-flex';
+        });
 }

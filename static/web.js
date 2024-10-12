@@ -100,3 +100,30 @@ function scrollToBottom() {
     const consoleOutput = document.getElementById('console-output');
     consoleOutput.scrollTop = consoleOutput.scrollHeight;
 }
+
+function installFile() {
+    // 获取并隐藏安装按钮
+    var button = document.getElementById('installButton');
+    button.style.display = 'none';
+
+    alert("开始安装...");
+
+    // 执行安装逻辑
+    fetch('/DownPaches')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('安装成功!');
+                location.reload();
+            } else {
+                alert('安装失败，请重试。');
+                // 安装失败后重新显示按钮
+                button.style.display = 'inline-flex';
+            }
+        })
+        .catch(error => {
+            alert('请求出错，请检查网络连接。');
+            // 请求出错后重新显示按钮
+            button.style.display = 'inline-flex';
+        });
+}

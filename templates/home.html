@@ -51,7 +51,7 @@
                     <td>{% if exe_exists %}<p>正常</p>{% else %}<p>缺少</p>{% endif %}</td>
                     <td>
                         {% if not exe_exists %}
-                        <a href="#" class="green-button" style="margin-left: 30px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="uploadFile()">
+                        <a href="#" class="green-button" style="margin-left: 30px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
                             <i class="fa-solid fa-download"></i> 安装
                         </a>
                         {% endif %}
@@ -72,7 +72,7 @@
                     <td>{% if tsg %}<p>正常</p>{% else %}<p>缺少</p>{% endif %}</td>
                     <td>
                         {% if not tsg %}
-                        <a href="DownPaches" class="green-button" style="margin-left: 30px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="uploadFile()">
+                        <a href="#" id="installButton" class="green-button" style="margin-left: 30px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="installFile()">
                             <i class="fa-solid fa-download"></i> 安装
                         </a>
                     {% else %}
