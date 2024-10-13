@@ -112,7 +112,7 @@ def update_global_variables():
     global port2
     global ip
     global mapa
-    global playermax
+    global maxplayers
     global thralls
     global dayminutes
     global daysbeforeblizzard
@@ -129,7 +129,7 @@ def update_global_variables():
     port2 = get_config_value('port2', '')
     ip = get_config_value('IP', '')
     mapa = get_gameconfig_value('map', 'Departure_Persistent')
-    playermax = get_gameconfig_value('playermax', '8')
+    maxplayers = get_gameconfig_value('maxplayers', '8')
     thralls = get_gameconfig_value('thralls', '2')
     dayminutes = get_gameconfig_value('dayminutes', '9')
     daysbeforeblizzard = get_gameconfig_value('daysbeforeblizzard', '3')
@@ -151,7 +151,7 @@ port2 = get_config_value('port2', '')
 ip = get_config_value('IP', '')
 
 mapa = get_config_value('map', 'Departure_Persistent')
-playermax = get_gameconfig_value('playermax', '8')
+maxplayers = get_gameconfig_value('maxplayers', '8')
 thralls= get_gameconfig_value('thralls', '2')
 dayminutes= get_gameconfig_value('dayminutes', '9')
 daysbeforeblizzard= get_gameconfig_value('daysbeforeblizzard', '3')
@@ -291,7 +291,7 @@ def save_blacklist():
     
     valid_steam_ids = [item['steam_id'] for item in data['UniqueIds'] if item['steam_id']]
     
-    new_data = {"steam_ids": valid_steam_ids}
+    new_data = {"UniqueIds": valid_steam_ids}
     file_path_new = 'DreadHunger\\Binaries\\Win64\\BlackList.json'
     
     with open(file_path_new, 'w', encoding='utf-8') as file:
@@ -325,7 +325,7 @@ def config_page():
     return render_template('config.html', port1=port1,
                            port2=port2,
                            ip=ip,
-                           playermax=playermax,
+                           maxplayers=maxplayers,
                            port=port,
                            password=password,
                            pin=pin,
@@ -644,7 +644,7 @@ def get_logs():
 @login_required
 def start_server():
     run_program("DreadHungerServer.exe",mapa + 
-                "?playermax=" + playermax + 
+                "?maxplayers=" + maxplayers + 
                 "?thralls=" + thralls +
                 "?dayminutes=" + dayminutes +
                 "?daysbeforeblizzard=" + daysbeforeblizzard +
@@ -714,7 +714,7 @@ def run_program_auto(program_path):
         
         args = [
             mapa + 
-            "?playermax=" + playermax + 
+            "?maxplayers=" + maxplayers + 
             "?thralls=" + thralls +
             "?dayminutes=" + dayminutes +
             "?daysbeforeblizzard=" + daysbeforeblizzard +
@@ -741,7 +741,7 @@ def run_program_auto(program_path):
                     
                 args = [
                     mapa + 
-                    "?playermax=" + playermax + 
+                    "?maxplayers=" + maxplayers + 
                     "?thralls=" + thralls +
                     "?dayminutes=" + dayminutes +
                     "?daysbeforeblizzard=" + daysbeforeblizzard +
@@ -1051,7 +1051,7 @@ def check_version(local_version):
 
 if __name__ == '__main__':
     
-    local_version = '1.0.0'
+    local_version = '1.0.3'
     
     if not check_version(local_version):
         exit(1)

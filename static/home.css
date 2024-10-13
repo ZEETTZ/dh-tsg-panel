@@ -160,11 +160,15 @@ h2 {
 }
 
 .console-scrollable {
-    position: relative;
-    width: 800px; 
-    height: 600px;
-    border: 1px solid #ccc;
-    overflow: auto;
+    height: 300px; /* 设置一个固定高度 */
+    overflow-y: auto; /* 启用垂直滚动条 */
+    border: 1px solid #ccc; /* 可选：添加边框 */
+    padding: 10px; /* 可选：添加内边距 */
+}
+
+#console-output {
+    white-space: pre-wrap; /* 保留换行符和空格 */
+    word-wrap: break-word; /* 自动换行 */
 }
 
 .resize-handle {

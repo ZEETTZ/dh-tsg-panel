@@ -23,21 +23,38 @@ function updatePortStatus() {
 }
 
 
-function updateConsole() {
-    fetch('/get_logs')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('console-output').textContent = data;
-        });
+
+function getLogs() {
+    fetch('/get_logs', {
+        method: 'GET'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(text => {
+        displayLogContent(text);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function displayLogContent(logContent) {
+    const logContainer = document.getElementById('console-output');
+    logContainer.textContent = logContent;
+    
+    // 直接滚动到最底部
+    logContainer.scrollTop = logContainer.scrollHeight;
 }
 
 window.onload = function() {
-    updateConsole();
     updateProcessStatus();
     updatePortStatus();
     setInterval(updateProcessStatus, 3000); 
     setInterval(updatePortStatus, 3000);
-    setInterval(updateConsole, 1000);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -90,16 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    scrollToBottom();
-});
-
-
-function scrollToBottom() {
-    const consoleOutput = document.getElementById('console-output');
-    consoleOutput.scrollTop = consoleOutput.scrollHeight;
-}
 
 function installFile() {
     // 获取并隐藏安装按钮

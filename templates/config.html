@@ -57,8 +57,8 @@
             <option value="Approach_Persistent" {{ 'selected' if map == 'Approach_Persistent' }}>入口</option>
         </select><br>
 
-        <label for="playermax">最大玩家人数:</label>
-        <input type="number" id="playermax" name="playermax" min="1" max="64" value="{% if playermax %}{{ playermax }}{% else %}8{% endif %}"><br>
+        <label for="maxplayers">最大玩家人数:</label>
+        <input type="number" id="maxplayers" name="maxplayers" min="1" max="64" value="{% if maxplayers %}{{ maxplayers }}{% else %}8{% endif %}"><br>
         <label for="thralls">内奸人数:</label>
         <input type="number" id="thralls" name="thralls"  min="1" max="64" value="{% if thralls %}{{ thralls }}{% else %}2{% endif %}"><br>
         <label for="dayminutes">每天分钟数:</label>
