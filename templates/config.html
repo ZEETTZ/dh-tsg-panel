@@ -12,16 +12,17 @@
         }
         
     </style>
-    <script>
-        function showSuccessAlert() {
-            alert("保存成功");
-        }
-    </script>
-    
+
+
     
 </head>
 <body>
-    <form action="/save_config" method="post" onsubmit="showSuccessAlert()" style="width: 320px;">
+    
+
+
+
+    <form id="configForm" action="/save_config" method="post" style="width: 320px;">
+        <button type="button" class="blue-button" onclick="location.href='/';">返回</button>
         <h2>服务器管理</h2>
         <label for="port1">游戏端口1:</label>
         <input type="text" title="切换端口1" id="port1" name="port1" value="{{ port1 }}"><br>
@@ -32,22 +33,24 @@
         <a href="https://docs.qq.com/aio/DU1NaaWlPWkxNZWxR?p=lFw3UYBIXvmlgA0ik7UE0I" target="_blank" style="cursor: pointer;">
             卡密:（点击申请）
         </a>
-        <input type="text"  title="卡密可以去网页申请或者QQ群申请"  id="password" name="password" value="{{ password }}"><br>
+        <input type="text" title="卡密可以去网页申请或者QQ群申请" id="password" name="password" value="{{ password }}"><br>
         <label for="port">控制台端口:</label>
         <input type="text" title="打开控制台：
-内网输入127.0.0.1:你的端口
-外网输入你服务器公网:你的端口" id="port" name="port" value="{{ port }}"><br>
+    内网输入127.0.0.1:你的端口
+    外网输入你服务器公网:你的端口" id="port" name="port" value="{{ port }}"><br>
         <label for="pin">pin码:</label>
         <input type="text" title="如果没设置默认为123456" id="pin" name="pin" value="{{ pin }}"><br>
-
+    
         <div class="button-group">
             <input type="submit" value="保存配置">
         </div>
 
+
+
     </form>
 
 
-    <form action="/save_game_config" method="post" onsubmit="showSuccessAlert()">
+    <form id="GameForm" action="/save_game_config" method="post" onsubmit="showSuccessAlert()">
         <h2>游戏配置</h2>
         <label for="map">地图选择:</label>
 
@@ -81,7 +84,7 @@
     </form>
 
 
-    <form action="/save_tsg_config" method="post" onsubmit="showSuccessAlert()" style="width: 400px;">
+    <form id = "Tsg_config" action="/save_tsg_config" method="post" onsubmit="showSuccessAlert()" style="width: 400px;">
         <h2>补丁管理</h2>
         <table class="file-table">
             <thead>
@@ -190,6 +193,40 @@
 
 
     </form>
+
+
+    <script>
+        function handleFormSubmit(formId, url, successMessage) {
+            document.getElementById(formId).addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch(url, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(successMessage || data.message);
+                    } else {
+                        alert('保存失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('请求出错');
+                });
+            });
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+
+            handleFormSubmit('configForm', '/save_config', '配置已保存');
+    
+            handleFormSubmit('GameForm', '/save_game_config', '游戏配置已保存');
+            handleFormSubmit('Tsg_config', '/save_tsg_config', '补丁配置已保存');
+        });
+    </script>
 
 
 

@@ -11,6 +11,7 @@ import subprocess
 import requests
 import shutil
 import re
+import threading
 import webbrowser
 import urllib.parse
 import logging
@@ -321,6 +322,7 @@ def process_status_port():
 
 @login_required
 def config_page():
+    update_global_variables()
     
     return render_template('config.html', port1=port1,
                            port2=port2,
@@ -350,6 +352,8 @@ def config_page():
 def save_config():
     config_data = request.form.to_dict()
     
+    response_data = {"success": True, "message": "配置保存成功"}
+
     if 'password' in config_data:
         card_data = config_data['password']
         
@@ -373,7 +377,7 @@ def save_config():
         with open('config.json', 'w', encoding='utf-8') as f:
             json.dump(config_json_data, f, ensure_ascii=False, indent=4)
     
-    return redirect(url_for('home'))
+    return jsonify(response_data)
 
 
 
@@ -381,10 +385,11 @@ def save_config():
 @app.route('/save_game_config', methods=['POST'])
 @login_required
 def save_game_config():
+    response_data = {"success": True, "message": "配置保存成功"}
     config_data = request.form.to_dict()
     with open('Gameconfig.json', 'w') as f:
         json.dump(config_data, f)
-    return redirect(url_for('home'))
+    return jsonify(response_data)
 
 #编辑文件
 @app.route('/edit', methods=['GET'])
@@ -600,13 +605,14 @@ def upload_file():
         return jsonify({"message": f"文件 {filename} 成功上传.", "location": folder}), 200
 
 #保存默认配置
-@app.route('/save_default_config', methods=['POST'])
-@login_required
-def save_default_config():
-    config_data = request.form.to_dict()
-    with open('Defaultconfig.json', 'w') as f:
-        json.dump(config_data, f)
-    return redirect(url_for('home'))
+# @app.route('/save_default_config', methods=['POST'])
+# @login_required
+# def save_default_config():
+#     response_data = {"success": True, "message": "配置保存成功"}
+#     config_data = request.form.to_dict()
+#     with open('Defaultconfig.json', 'w') as f:
+#         json.dump(config_data, f)
+#     return jsonify(response_data)
 
 
 
@@ -614,10 +620,12 @@ def save_default_config():
 @app.route('/save_tsg_config', methods=['POST'])
 @login_required
 def save_tsg_config():
+    response_data = {"success": True, "message": "配置保存成功"}
+
     config_data = request.form.to_dict()
     with open('Tsgconfig.json', 'w') as f:
         json.dump(config_data, f)
-    return redirect(url_for('home'))
+    return jsonify(response_data)
 ####################################路由#############################################
 
 ####################################服务器相关########################################
@@ -639,10 +647,16 @@ def get_logs():
         log_content = file.read()
     return Response(log_content, mimetype='text/plain')
 
+
+
+
 #开启服务器路由
 @app.route('/start_server')
 @login_required
 def start_server():
+    response_data = {"success": True, "message": "服务器开启成功"}
+    结束进程("DreadHungerServer.exe")
+    结束进程("DreadHungerServer-Win64-Shipping.exe")
     run_program("DreadHungerServer.exe",mapa + 
                 "?maxplayers=" + maxplayers + 
                 "?thralls=" + thralls +
@@ -655,37 +669,44 @@ def start_server():
                 "-port="+ port1,
                 "-log",
                 )
-    return redirect(url_for('home'))
+    return jsonify(response_data)
 #停止服务器路由
 @app.route('/stop_server')
 @login_required
 def stop_server():
+    response_data = {"success": True, "message": "服务器关闭成功"}
 
     global should_stop_auto_restart
     should_stop_auto_restart = True  
     if global_process:
         global_process.terminate()  
+        
     结束进程("DreadHungerServer.exe")
     结束进程("DreadHungerServer-Win64-Shipping.exe")
-    return redirect(url_for('home'))
+    return jsonify(response_data)
 #自动停止服务器路由
 @app.route('/stop_server/auto')
 @login_required
 def stop_server_auto():
+    response_data = {"success": True, "message": "服务器关闭成功"}
     结束进程("DreadHungerServer.exe")
     结束进程("DreadHungerServer-Win64-Shipping.exe")
-    return redirect(url_for('home'))
+    return jsonify(response_data)
 
 #自动开启服务器切换路由
 @app.route('/start_server/auto')
 @login_required
 def start_server_auto():
+    response_data = {"success": True, "message": "自动重启已开启"}
     global should_stop_auto_restart
     should_stop_auto_restart = False 
     global isport
+    
+    结束进程("DreadHungerServer.exe")
+    结束进程("DreadHungerServer-Win64-Shipping.exe")
 
-    run_program_auto("DreadHungerServer.exe")
-    return redirect(url_for('home'))
+    start_program_thread("DreadHungerServer.exe")
+    return jsonify(response_data)
 
 #普通开服
 def run_program(program_path, *args):
@@ -698,72 +719,64 @@ def run_program(program_path, *args):
     except Exception as e:
         print(f"启动程序时发生错误: {e}")
 
-#端口切换开服
+# 端口切换开服
 def run_program_auto(program_path):
-    
-    # 他妈的这里真是 狗屎中狗屎
-    # 第一次asgs不读的 进循环没了
-    # 用全局变量他妈的也有问题
-    # 我真的草了
-    
     global should_stop_auto_restart
     global global_process
     global isport
-    
-    try:
-        
-        args = [
-            mapa + 
-            "?maxplayers=" + maxplayers + 
-            "?thralls=" + thralls +
-            "?dayminutes=" + dayminutes +
-            "?daysbeforeblizzard=" + daysbeforeblizzard +
-            "?predatordamage=" + predatordamage +
-            "?coalburnrate=" + coalburnrate +
-            "?hungerrate=" + hungerrate +
-            "?coldintensity=" + coldintensity,
-            "-port="+ isport,
+    global port1
+    global port2
+    global mapa
+    global maxplayers
+    global thralls
+    global dayminutes
+    global daysbeforeblizzard
+    global predatordamage
+    global coalburnrate
+    global hungerrate
+    global coldintensity
+
+    def build_args():
+        return [
+            f"{mapa}?maxplayers={maxplayers}&thralls={thralls}&dayminutes={dayminutes}&daysbeforeblizzard={daysbeforeblizzard}&predatordamage={predatordamage}&coalburnrate={coalburnrate}&hungerrate={hungerrate}&coldintensity={coldintensity}",
+            f"-port={isport}",
             "-log",
         ]
-        
 
-        global_process = subprocess.Popen([program_path] + list(args))
-        
+    def is_process_running(process_name):
+        for proc in psutil.process_iter(['pid', 'name']):
+            if proc.info['name'] == process_name:
+                return True
+        return False
 
+    try:
         while not should_stop_auto_restart:
-            
-            if global_process.poll() is not None:
-                
-                if isport == port1:
-                    isport = port2 
-                else:
-                    isport = port1
-                    
-                args = [
-                    mapa + 
-                    "?maxplayers=" + maxplayers + 
-                    "?thralls=" + thralls +
-                    "?dayminutes=" + dayminutes +
-                    "?daysbeforeblizzard=" + daysbeforeblizzard +
-                    "?predatordamage=" + predatordamage +
-                    "?coalburnrate=" + coalburnrate +
-                    "?hungerrate=" + hungerrate +
-                    "?coldintensity=" + coldintensity,
-                    "-port="+ isport,
-                    "-log",
-                ]    
-                
-                print(f"成功启动程序: {program_path} 参数: {args} {isport}")
-            
+            if not is_process_running(program_path.split('/')[-1]):
+                args = build_args()
+                global_process = subprocess.Popen([program_path] + args)
+                print(f"成功启动程序: {program_path} 参数: {args}")
 
-                global_process = subprocess.Popen([program_path] + list(args))
+                while not should_stop_auto_restart:
+                    if global_process.poll() is not None:
+                        # 切换端口号
+                        isport = port2 if isport == port1 else port1
+                        args = build_args()
+                        print(f"成功启动程序: {program_path} 参数: {args}")
+                        global_process = subprocess.Popen([program_path] + args)
+                        break
+                    else:
+                        time.sleep(3)
             else:
-                time.sleep(1) 
-        
+                time.sleep(5)  # 避免频繁检查
     except FileNotFoundError:
         print(f"错误：找不到程序 {program_path}")
     except Exception as e:
         print(f"启动程序时发生错误: {e}")
+# 启动线程
+def start_program_thread(program_path):
+    thread = threading.Thread(target=run_program_auto, args=(program_path,))
+    thread.start()
+    return thread
 
 def end_process(process_name):
     import psutil
@@ -1051,7 +1064,7 @@ def check_version(local_version):
 
 if __name__ == '__main__':
     
-    local_version = '1.0.3'
+    local_version = '1.0.4'
     
     if not check_version(local_version):
         exit(1)

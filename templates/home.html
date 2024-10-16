@@ -79,7 +79,7 @@
                         <a href="config" class="other-button" style="margin-left: 0px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="otherAction()">
                              配置
                         </a>
-                        <a href="http://{{public_ip}}:8080/" class="other-button" style="margin-left: 0px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="otherAction()"  target="_blank">
+                        <a href="http://{{public_ip}}:{{port}}/" class="other-button" style="margin-left: 0px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" onclick="otherAction()"  target="_blank">
                             打开
                        </a>
                     {% endif %}
@@ -97,10 +97,10 @@
         </div>
         <div class="form-body">
             <div class="button-group">
-                <a href="/start_server" class="button-link">
+                <a href="/start_server" class="button-link" id="startServerLink">
                     <input type="button" value="开启服务器">
                 </a>
-                <a href="/stop_server" class="button-link">
+                <a href="/stop_server" class="button-link" id="stopServerLink">
                     <input type="button" value="关闭服务器">
                 </a>
             </div>

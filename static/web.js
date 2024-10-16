@@ -2,7 +2,14 @@ function updateProcessStatus() {
     fetch('/process_status')
         .then(response => response.json())
         .then(data => {
-            document.getElementById('process-status').textContent = data.exists ? '存在' : '不存在';
+            const statusElement = document.getElementById('process-status');
+            if (data.exists) {
+                statusElement.textContent = '存在';
+                statusElement.style.color = 'green';
+            } else {
+                statusElement.textContent = '不存在';
+                statusElement.style.color = 'red';
+            }
         });
 }
 
@@ -72,36 +79,63 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
 document.addEventListener('DOMContentLoaded', function() {
     const startServerLink = document.querySelector('a[href="/start_server"]');
+    const stopServerLink = document.querySelector('a[href="/stop_server"]');
     const autoRestartCheckbox = document.getElementById('autoRestartCheckbox');
-    updateStartServerLink(autoRestartCheckbox.checked);
+
+    // 初始化链接
+    updateLinks(autoRestartCheckbox.checked);
+
+    // 绑定 change 事件
     autoRestartCheckbox.addEventListener('change', function() {
-        updateStartServerLink(this.checked);
+        updateLinks(this.checked);
     });
-    function updateStartServerLink(shouldAutoRestart) {
+
+    function updateLinks(shouldAutoRestart) {
         if (shouldAutoRestart) {
             startServerLink.href = "/start_server/auto";
+            stopServerLink.href = "/stop_server/auto";
         } else {
             startServerLink.href = "/start_server";
+            stopServerLink.href = "/stop_server";
         }
     }
-});
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    const startServerLink = document.querySelector('a[href="/stop_server"]');
-    const autoRestartCheckbox = document.getElementById('autoRestartCheckbox');
-    updateStartServerLink(autoRestartCheckbox.checked);
-    autoRestartCheckbox.addEventListener('change', function() {
-        updateStartServerLink(this.checked);
+    // 处理启动服务器的链接
+    startServerLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        const url = this.href;
+        sendRequest(url);
     });
-    function updateStartServerLink(shouldAutoRestart) {
-        if (shouldAutoRestart) {
-            startServerLink.href = "/stop_server/auto";
-        } else {
-            startServerLink.href = "/stop_server";
-        }
+
+    // 处理停止服务器的链接
+    stopServerLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        const url = this.href;
+        sendRequest(url);
+    });
+
+    function sendRequest(url) {
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            if (responseData.success) {
+                alert(responseData.message);
+            } else {
+                alert(`操作失败`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('请求失败，请重试。');
+        });
     }
 });
 
