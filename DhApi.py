@@ -752,20 +752,18 @@ def run_program_auto(program_path):
     try:
         while not should_stop_auto_restart:
             if not is_process_running(program_path.split('/')[-1]):
+                # 切换端口号
+                isport = port2 if isport == port1 else port1
                 args = build_args()
                 global_process = subprocess.Popen([program_path] + args)
                 print(f"成功启动程序: {program_path} 参数: {args}")
 
                 while not should_stop_auto_restart:
                     if global_process.poll() is not None:
-                        # 切换端口号
-                        isport = port2 if isport == port1 else port1
-                        args = build_args()
-                        print(f"成功启动程序: {program_path} 参数: {args}")
-                        global_process = subprocess.Popen([program_path] + args)
+                        print(f"程序已结束，准备重启...")
                         break
                     else:
-                        time.sleep(3)
+                        time.sleep(5)
             else:
                 time.sleep(5)  # 避免频繁检查
     except FileNotFoundError:
@@ -1064,7 +1062,7 @@ def check_version(local_version):
 
 if __name__ == '__main__':
     
-    local_version = '1.0.4'
+    local_version = '1.0.5'
     
     if not check_version(local_version):
         exit(1)
