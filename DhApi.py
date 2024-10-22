@@ -865,7 +865,13 @@ def MD5计算(file_path):
 
 def 检测TSG插件():
     try:
-        expected_md5 = "2b91b31cf72f7b0a484ca6e810b5a608"
+        
+        
+        version_info = get_version_info()
+        if not version_info:
+            return False
+        md5TSG = version_info.get('md5')
+        expected_md5 = md5TSG
         md5 = MD5计算(r"DreadHungerServer.exe")
         return md5 == expected_md5
     except Exception as e:
