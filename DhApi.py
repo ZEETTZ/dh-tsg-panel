@@ -94,16 +94,14 @@ def get_download_info(api_url):
 
 def get_public_ip():
     try:
-        response = requests.get('https://checkip.amazonaws.com')
-        if response.status_code == 200:
-            return response.text.strip()
-        else:
-            return None
+        version_info = get_version_info()
+        if not version_info:
+            return False
+        ip = version_info.get('ip')
+        return ip
     except Exception as e:
         print(f"Error: {e}")
         return None
-public_ip = "0.0.0.0"
-
 ####################################变量#############################################
 
 
@@ -1077,12 +1075,12 @@ def check_version(local_version):
 
 if __name__ == '__main__':
     
-    local_version = '1.0.5'
+    local_version = '1.0.6'
     
     if not check_version(local_version):
         exit(1)
 
-    public_ip = "0.0.0.0"
+    public_ip = get_public_ip()
 
     def print_color(text, color_code):
         print(f"{color_code}{text}{RESET}")
