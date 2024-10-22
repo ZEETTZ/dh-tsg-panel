@@ -102,7 +102,7 @@ def get_public_ip():
     except Exception as e:
         print(f"Error: {e}")
         return None
-public_ip = get_public_ip()
+public_ip = "0.0.0.0"
 
 ####################################变量#############################################
 
@@ -721,6 +721,7 @@ def run_program(program_path, *args):
 
 # 端口切换开服
 def run_program_auto(program_path):
+    
     global should_stop_auto_restart
     global global_process
     global isport
@@ -738,9 +739,17 @@ def run_program_auto(program_path):
 
     def build_args():
         return [
-            f"{mapa}?maxplayers={maxplayers}&thralls={thralls}&dayminutes={dayminutes}&daysbeforeblizzard={daysbeforeblizzard}&predatordamage={predatordamage}&coalburnrate={coalburnrate}&hungerrate={hungerrate}&coldintensity={coldintensity}",
-            f"-port={isport}",
-            "-log",
+                    mapa + 
+                "?maxplayers=" + maxplayers + 
+                "?thralls=" + thralls +
+                "?dayminutes=" + dayminutes +
+                "?daysbeforeblizzard=" + daysbeforeblizzard +
+                "?predatordamage=" + predatordamage +
+                "?coalburnrate=" + coalburnrate +
+                "?hungerrate=" + hungerrate +
+                "?coldintensity=" + coldintensity,
+                "-port="+ isport,
+                "-log"
         ]
 
     def is_process_running(process_name):
@@ -755,7 +764,7 @@ def run_program_auto(program_path):
                 # 切换端口号
                 isport = port2 if isport == port1 else port1
                 args = build_args()
-                global_process = subprocess.Popen([program_path] + args)
+                global_process = subprocess.Popen([program_path] + list(args))
                 print(f"成功启动程序: {program_path} 参数: {args}")
 
                 while not should_stop_auto_restart:
@@ -1067,7 +1076,7 @@ if __name__ == '__main__':
     if not check_version(local_version):
         exit(1)
 
-    public_ip = get_public_ip()
+    public_ip = "0.0.0.0"
 
     def print_color(text, color_code):
         print(f"{color_code}{text}{RESET}")
