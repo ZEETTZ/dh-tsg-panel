@@ -366,10 +366,15 @@ def save_config():
         port = config_data['port']
         pin = config_data['pin']
         
+        version_info = get_version_tsg()
+        if not version_info:
+            return False
+        latest_version = version_info.get('version')
+        
         config_json_data = {"port": port,
                             "pin": pin,
                             "method":"web",
-                            "version":"1.0.4",
+                            "version":latest_version,
                             "server_path":f'{current_dir}',
                             "enable_frp": False}
         with open('config.json', 'w', encoding='utf-8') as f:
@@ -1057,6 +1062,15 @@ def get_version_info():
         print_color(f"获取版本信息失败", YELLOW)
         return None
 
+def get_version_tsg():
+    """从API获取版本信息"""
+    try:
+        response = requests.get('https://tsg-console-api.moeyy.cn/version')
+        response.raise_for_status()  # 检查请求是否成功
+        return response.json()
+    except requests.RequestException as e:
+        print_color(f"获取版本信息失败", YELLOW)
+        return None
 def check_version(local_version):
     """检查本地版本是否是最新的"""
     version_info = get_version_info()
@@ -1075,7 +1089,7 @@ def check_version(local_version):
 
 if __name__ == '__main__':
     
-    local_version = '1.0.6'
+    local_version = '1.0.7'
     
     if not check_version(local_version):
         exit(1)
