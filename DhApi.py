@@ -368,15 +368,27 @@ def save_config():
         
         version_info = get_version_tsg()
         if not version_info:
-            return False
+            return jsonify({"success": False, "message": "获取版本信息失败"})
         latest_version = version_info.get('version')
         
-        config_json_data = {"port": port,
-                            "pin": pin,
-                            "method":"web",
-                            "version":latest_version,
-                            "server_path":f'{current_dir}',
-                            "enable_frp": False}
+        # 添加 server_args 和 console_port 字段
+        server_args = [
+            "Departure_Persistent?maxplayers=8?thralls=2?daysbeforeblizzard=3?dayminutes=9?predatordamage=1.0?coldintensity=1.0?hungerrate=1.0?coalburnrate=1.0",
+            "-log",
+            f"-port={port}"
+        ]
+        console_port = 4399
+        
+        config_json_data = {
+            "version": latest_version,
+            "server_path": current_dir,
+            "server_args": server_args,
+            "port": int(port),
+            "pin": pin,
+            "method": "web",
+            "console_port": console_port,
+            "enable_frp": False
+        }
         with open('config.json', 'w', encoding='utf-8') as f:
             json.dump(config_json_data, f, ensure_ascii=False, indent=4)
     
@@ -1055,7 +1067,7 @@ def print_color(text, color_code):
 def get_version_info():
     """从API获取版本信息"""
     try:
-        response = requests.get('http://vps3.elfidc.com:52016/version')
+        response = requests.get('http://117.88.60.154:8000/version')
         response.raise_for_status()  # 检查请求是否成功
         return response.json()
     except requests.RequestException as e:
@@ -1089,7 +1101,7 @@ def check_version(local_version):
 
 if __name__ == '__main__':
     
-    local_version = '1.0.7'
+    local_version = '1.0.9'
     
     if not check_version(local_version):
         exit(1)
