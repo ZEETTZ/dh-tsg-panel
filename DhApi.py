@@ -571,7 +571,8 @@ def delete_file():
 @app.route('/DownPaches', methods=['GET'])
 @login_required
 def Down_Paches():
-    url = 'https://tsg-console-api.moeyy.cn/version?mode=download'
+    # dh.haeridc.cn
+    url = '自己去官网下载即可'
     
     download_info = get_download_info(url)
     download_url = download_info['download_url']
@@ -806,20 +807,7 @@ def end_process(process_name):
         if process_name.lower() in proc.info['name'].lower():
             p = psutil.Process(proc.info['pid'])
             p.terminate()
-####################################文件编辑功能##########################################
-# @app.route('/save_patch', methods=['POST'])
-# def save_patch():
-#     data = request.get_json()
-#     patch_name = data.get('patchName')
-#     patch_content = data.get('patchContent')
 
-#     # 这里应该有逻辑去更新数据库中的补丁信息
-#     # 示例：update_patch_in_db(patch_name, patch_content)
-
-#     # 假设更新成功
-#     return jsonify({'success': True, 'message': '保存成功'})
-
-####################################文件编辑功能##########################################
 ####################################服务器相关##########################################
 
 ######################################补丁################################################
@@ -1067,7 +1055,7 @@ def print_color(text, color_code):
 def get_version_info():
     """从API获取版本信息"""
     try:
-        response = requests.get('http://117.88.60.154:8000/version')
+        response = requests.get('自己写吧')
         response.raise_for_status()  # 检查请求是否成功
         return response.json()
     except requests.RequestException as e:
@@ -1077,7 +1065,7 @@ def get_version_info():
 def get_version_tsg():
     """从API获取版本信息"""
     try:
-        response = requests.get('https://tsg-console-api.moeyy.cn/version')
+        response = requests.get('自己写吧')
         response.raise_for_status()  # 检查请求是否成功
         return response.json()
     except requests.RequestException as e:
