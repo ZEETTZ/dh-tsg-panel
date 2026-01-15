@@ -43,30 +43,42 @@ python DhApi.py
 
 ## 许可证
 
-本项目采用 MIT 许可证，详情请见 [LICENSE](LICENSE) 文件。
+本项目采用 CC BY-NC 4.0 许可证，详情请见 [LICENSE](LICENSE) 文件。
 
 ```
-The MIT License (MIT)
+Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
-Copyright (c) 2025 TSG海杀网页管理面板
+Copyright (c) 2025 TSG Team
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Under the following terms:
+- Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- NonCommercial — You may not use the material for commercial purposes.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+For full license text, see: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+--------------------
+
+创作共用（CC BY-NC 4.0）非商业许可
+
+版权所有 (c) 2025 TSG Team
+
+您可以自由：
+- 分享 — 在任何媒介或格式上复制、发行本作品
+- 演绎 — 混合、转换和基于本作品创作新作品
+
+但须遵守以下条件：
+- 署名 — 必须给予适当的署名，提供许可证链接，并说明是否进行了修改。
+- 非商业性使用 — 不能将本作品用于商业目的。
+
+无其他限制 — 不得施加法律条款或技术措施，从法律上禁止他人做许可允许的事情。
+
+完整许可文本参见：https://creativecommons.org/licenses/by-nc/4.0/legalcode
 ```
 
 ## 贡献
